@@ -1,0 +1,41 @@
+{
+    "navigation": {
+      "home": "Inicio",
+      "about": "Acerca de",
+      "projects": "Proyectos",
+      "contact": "Contacto",
+      "blog": "Blog"
+    },
+    "actions": {
+      "submit": "Enviar",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "close": "Cerrar",
+      "back": "Atrás",
+      "next": "Siguiente"
+    },
+    "messages": {
+      "loading": "Cargando...",
+      "error": "Ha ocurrido un error",
+      "success": "Operación exitosa",
+      "confirmDelete": "¿Estás seguro de que quieres eliminar esto?",
+      "required": "Este campo es obligatorio",
+      "invalidEmail": "Dirección de correo electrónico inválida"
+    },
+    "footer": {
+      "rights": "Todos los derechos reservados",
+      "followMe": "Sígueme",
+      "contactMe": "Contáctame"
+    },
+    "theme": {
+      "dark": "Modo oscuro",
+      "light": "Modo claro"
+    },
+    "language": {
+      "select": "Seleccionar idioma",
+      "en": "Inglés",
+      "es": "Español"
+    }
+  }

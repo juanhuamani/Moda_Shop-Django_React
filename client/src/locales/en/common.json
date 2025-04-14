@@ -1,0 +1,41 @@
+{
+    "navigation": {
+      "home": "Home",
+      "about": "About",
+      "projects": "Projects",
+      "contact": "Contact",
+      "blog": "Blog"
+    },
+    "actions": {
+      "submit": "Submit",
+      "cancel": "Cancel",
+      "save": "Save",
+      "edit": "Edit",
+      "delete": "Delete",
+      "close": "Close",
+      "back": "Back",
+      "next": "Next"
+    },
+    "messages": {
+      "loading": "Loading...",
+      "error": "An error has occurred",
+      "success": "Operation successful",
+      "confirmDelete": "Are you sure you want to delete this?",
+      "required": "This field is required",
+      "invalidEmail": "Invalid email address"
+    },
+    "footer": {
+      "rights": "All rights reserved",
+      "followMe": "Follow me",
+      "contactMe": "Contact me"
+    },
+    "theme": {
+      "dark": "Dark mode",
+      "light": "Light mode"
+    },
+    "language": {
+      "select": "Select language",
+      "en": "English",
+      "es": "Spanish"
+    }
+  }

@@ -1,0 +1,63 @@
+from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
+from .models import User
+from django.db.models import Q
+
+class RegisterSerializer(serializers.ModelSerializer):
+    password2 = serializers.CharField( write_only=True)
+    email = serializers.EmailField(
+        required=True,
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message="A user with this email already exists."
+            )
+        ]
+    )
+    class Meta:
+        model = User
+        fields = ['email', 'username', 'password', 'password2', 'phone', 'address', 'first_name', 'last_name', 'avatar']
+        extra_kwargs = {
+           'email': {'required': True}, 
+           'password': {'write_only': True},
+        }
+
+    def validate(self, data):
+        if data['password'] != data['password2']:
+            raise serializers.ValidationError("Passwords don't match")
+
+        if User.objects.filter(email=data['email']).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+
+        return data
+
+    def create(self, validated_data):
+        return User.objects.create_user(
+            username=validated_data['username'],
+            email=validated_data['email'],
+            password=validated_data['password'],
+            phone=validated_data.get('phone', ''), 
+            address=validated_data.get('address', '')
+        )
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, data):
+        identifier = data.get('email')
+        password = data.get('password')
+
+        if not identifier or not password:
+            raise serializers.ValidationError('Ambos campos son requeridos.')
+
+        user = User.objects.filter(
+            Q(username=identifier) | Q(email=identifier)
+        ).first()
+
+        if user is None or not user.check_password(password):
+            raise serializers.ValidationError('Credenciales inválidas.')
+
+        data['user'] = user
+        return data
+
