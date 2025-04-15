@@ -11,7 +11,7 @@ interface LoginFormProps {
 }
 
 interface Inputs {
-  email: string;
+  identifier: string;
   password: string;
 }
 
@@ -20,7 +20,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
   const { register, handleSubmit, formState: { errors }, } = useForm({
     defaultValues: {
-      email: "",
+      identifier: "",
       password: "",
     },
   });
@@ -40,8 +40,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         console.error(error);
       }
     );
-    console.log(data);
-    //onSuccess();
   };
   return (
     <div className="space-y-6">
@@ -66,10 +64,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
             autoComplete="email"
             autoCorrect="off"
             className="bg-secondary-light border-secondary text-tertiary"
-            {...register("email", { 
+            {...register("identifier", { 
               required: "Este campo es obligatorio"
             })}
-            errorMessage={errors.email?.message}
+            errorMessage={errors.identifier?.message}
           />
         </div>
         <div className="space-y-2">

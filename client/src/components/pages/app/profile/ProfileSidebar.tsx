@@ -87,7 +87,7 @@ function ProfileCard({
       setIsUploading(false);
     }
   };
-
+  console.log(user);
   return (
     <Card className="bg-secondary-light border-secondary">
       <CardContent className="p-6">
@@ -100,7 +100,7 @@ function ProfileCard({
                 </div>
               ) : null}
               <AvatarImage
-                src={user.avatar.startsWith("http") ? user.avatar : `${import.meta.env.VITE_API_URL}/avatars/${user.avatar}`}
+                src={user?.avatar?.startsWith("http") ? user.avatar : `${import.meta.env.VITE_API_URL}/avatars/${user.avatar}`}
                 alt="Avatar"
                 />
               <AvatarFallback className="bg-primary text-tertiary">
@@ -131,17 +131,9 @@ function ProfileCard({
           </h2>
           <p className="text-sm text-tertiary/70">{user.email}</p>
           <div className="mt-2">
-            <Badge className="bg-primary text-tertiary"></Badge>
-          </div>
-          <div className="mt-4 w-full space-y-2 text-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-tertiary/70">Plan:</span>
-              <span className="font-medium text-tertiary"></span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-tertiary/70">Miembro desde:</span>
-              <span className="font-medium text-tertiary"></span>
-            </div>
+            <Badge className="bg-primary text-tertiary">
+              
+            </Badge>
           </div>
         </div>
       </CardContent>
@@ -167,12 +159,12 @@ type NavigationItem = {
 function NavigationCard({ items }: { items: NavigationItem[] }) {
   return (
     <Card className="bg-secondary-light border-secondary">
-      <CardHeader>
+      <CardHeader className="px-6">
         <CardTitle className="text-lg text-tertiary">
           Navegación rápida
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="px-6">
         <nav>
           <ul className="space-y-1">
             {items.map((item, index) => (

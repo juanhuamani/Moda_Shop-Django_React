@@ -45,7 +45,7 @@ export function Sidebar({ mobileMenuOpen, onMobileMenuClose }: SidebarProps) {
               <UserAvatar  />
               <div>
                 <p className="text-sm font-medium text-[hsl(215,100%,92%)]">{user?.first_name} {user?.last_name}</p>
-                <p className="text-xs text-[hsl(215,100%,92%)/70]">{user?.email}</p>
+                <p className="text-xs text-tertiary">{user?.username}</p>
               </div>
             </div>
           </div>

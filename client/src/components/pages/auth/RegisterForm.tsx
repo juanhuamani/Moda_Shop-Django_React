@@ -15,11 +15,14 @@ interface Inputs {
   last_name: string;
   email: string;
   password: string;
+  password2: string;
   terms: boolean;
+  username: string;
 }
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
   const {
     register,
     handleSubmit,
@@ -27,6 +30,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
     setValue,
     clearErrors,
     formState: { errors },
+    watch
   } = useForm<Inputs>({
     defaultValues: {
       first_name: "",
@@ -34,9 +38,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       email: "",
       password: "",
       terms: false,
+      username: "",
+      password2: "",
     },
   });
   const { t } = useTranslation('auth');
+  const password = watch("password");
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     if (!data.terms) {
       setError("terms", {
@@ -52,6 +59,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         onSuccess();
       })
       .catch((error) => {
+        console.error(error);
         if (error.response.data?.errors) {
           const { errors } = error.response.data;
           for (const key in errors) {
@@ -116,6 +124,21 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           </div>
         </div>
         <div className="space-y-2">
+          <Label htmlFor="username" className="text-tertiary">
+            {t('register.username')}
+          </Label>
+          <Input
+            id="username"
+            placeholder="JuanPerez123"
+            autoComplete="username"
+            className="bg-secondary-light border-secondary text-tertiary"
+            errorMessage={errors.username?.message}
+            {...register("username", {
+              required: "Este campo es obligatorio",
+            })}
+          />
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="email" className="text-tertiary">
             {t('register.email')}
           </Label>
@@ -170,6 +193,41 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
                   value: 6,
                   message: "La contraseña debe tener al menos 6 caracteres",
                 },
+              })}
+            />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="password" className="text-tertiary">
+            {t('register.confirmPassword')}
+          </Label>
+          <div className="relative">
+            <Input
+              id="password2"
+              type={showPassword2 ? "text" : "password"}
+              autoComplete="new-password"
+              className="bg-secondary-light border-secondary text-tertiary pr-10"
+              iconPosition="right"
+              icon={
+                showPassword2 ? (
+                  <EyeOff
+                    size={16}
+                    className="text-tertiary"
+                    onClick={() => setShowPassword2(!showPassword2)}
+                  />
+                ) : (
+                  <Eye
+                    size={16}
+                    className="text-tertiary"
+                    onClick={() => setShowPassword2(!showPassword2)}
+                  />
+                )
+              }
+              errorMessage={errors.password2?.message}
+              {...register("password2", {
+                required: "Este campo es obligatorio",
+                validate: (value) =>
+                  value === password || "Las contraseñas no coinciden",
               })}
             />
           </div>
