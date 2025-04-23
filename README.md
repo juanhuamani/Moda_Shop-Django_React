@@ -29,8 +29,7 @@ Modern e-commerce platform with a decoupled architecture featuring a React-based
 |-----------------|------------------------------------------------------------------------------|
 | **Frontend**    | React 18, TypeScript 5, Vite 4, Redux Toolkit, Tailwind CSS 3                |
 | **Backend**     | Django 4.2, Django REST Framework 3.14                                      |
-| **Database**    | PostgreSQL 15, Redis 7 (caching)                                            |
-| **DevOps**      | Docker 24, GitHub Actions, ESLint, Prettier, Jest                            |
+| **Database**    | SqlLite                                      |
 
 ## Getting Started 🚀
 
