@@ -3,32 +3,40 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Spinner } from "@/components/ui";
 import Cookies from 'js-cookie';
+import { useAuth } from "@/context/auth-context";
 
 export const LogoutRoute = () => {
   const navigate = useNavigate();
+  const { refreshAuth } = useAuth();
 
   useEffect(() => {
-    const token = Cookies.get('access_token');
+    const token = Cookies.get("access_token");
+
     const logout = async () => {
-      authApi
-        .post("/logout",null,{
-        headers: {
-          Authorization: `Bearer ${token}`
-        }})
-        .then(() => {
-          navigate("/login");
-        })
-        .catch(() => {
-          navigate("/login");
+      try {
+        await authApi.post("/logout", null, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
+      } catch (error) {
+        console.error("Logout failed:", error);
+      } finally {
+        Cookies.remove("access_token");
+        Cookies.remove("refresh_token");
+        await refreshAuth();
+        navigate("/login"); 
+      }
     };
-    
+
     setTimeout(() => {
       if (token) {
-        logout(); 
+        logout();
+      } else {
+        navigate("/login");
       }
     }, 3000);
-  }, [navigate]);
+  }, [navigate, refreshAuth]);
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-100">

@@ -59,9 +59,9 @@ export const paths = {
         path: "/app/categories",
         getHref: () => "/app/categories", 
       },
-      orders: {
-        path: "/app/orders",
-        getHref: () => "/app/orders", 
+      cart: {
+        path: "/app/cart",
+        getHref: () => "/app/cart", 
       },
       discounts: {
         path: "/app/discounts",

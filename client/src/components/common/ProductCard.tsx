@@ -1,29 +1,35 @@
-import { Badge, Button } from "@/components/ui"
+import { Badge, Button, Image } from "@/components/ui"
 import { Tooltip } from "@/components/ui/ToolTip"
 import { Heart, Search, ShoppingCart, Star } from "lucide-react"
+import { Product } from "@/types/Product"
+import { cn } from "@/utils/cn"
+import { addToCart } from '@/services/cartService'
+import { useState } from "react"
 
 interface ProductCardProps {
-  product: {
-    id: number
-    name: string
-    price: string
-    image: string
-    originalPrice?: string
-    discount?: string
-    rating?: number
-    reviews?: number
-    isNew?: boolean
-  }
+  product: Product
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+
+  const handleAddToCart = async () => {
+    setIsLoading(true)
+    try {
+      await addToCart(product.id)
+    } catch (error) {
+      console.error('Error al añadir al carrito:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
   return (
     <div className="group relative overflow-hidden rounded-lg border border-[hsl(224,34%,30%)]">
       <div className="relative aspect-square overflow-hidden bg-[hsl(224,34%,25%)]">
-        <img
-          src={product.image || "/placeholder.svg"}
+        <Image
+          src={product.image}
           alt={product.name}
-          className="h-full w-full object-cover transition-transform group-hover:scale-105"
+          className="object-cover object-center w-full h-full transition-transform duration-300 group-hover:scale-110 cursor-pointer"
         />
         {product.discount && (
           <Badge variant="destructive" className="absolute left-2 top-2">
@@ -52,10 +58,12 @@ export function ProductCard({ product }: ProductCardProps) {
         <h3 className="mb-1 font-medium text-[hsl(215,100%,92%)]">{product.name}</h3>
         <div className="mb-2 flex items-center gap-2">
           <div className="flex items-center">
-            <Star className="h-3 w-3 fill-current text-yellow-500" />
-            <span className="ml-1 text-xs text-[hsl(215,100%,92%)/70]">
-              {product.rating} ({product.reviews})
-            </span>
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className={cn(
+                "h-4 w-4 text-yellow-400",
+                i < (product.rating ?? 0) ? "fill-current" : "fill-transparent"
+              )}/>
+            ))}
           </div>
         </div>
         <div className="flex items-center justify-between">
@@ -65,7 +73,7 @@ export function ProductCard({ product }: ProductCardProps) {
               <span className="text-sm text-[hsl(215,100%,92%)/70] line-through">{product.originalPrice}</span>
             )}
           </div>
-          <Button variant="ghost" size="icon-sm">
+          <Button variant="ghost" size="icon-sm" onClick={handleAddToCart} isLoading={isLoading}>
             <ShoppingCart className="h-4 w-4" />
           </Button>
         </div>

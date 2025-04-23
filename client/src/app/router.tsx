@@ -75,6 +75,24 @@ export const createAppRouter = () =>
             ErrorBoundary: AppRootErrorBoundary,
           },
           {
+            path: paths.app.products.path,
+            lazy: async () => {
+              const { ProductsRoute } = await import("@/pages/app/products");
+              return {
+                Component: ProductsRoute,
+              };
+            },
+          },
+          {
+            path: paths.app.cart.path,
+            lazy: async () => {
+              const { CartPage } = await import("@/pages/app/cart");
+              return {
+                Component: CartPage,
+              };
+            },
+          },
+          {
             path: paths.app.profile.path,
             lazy: async () => {
               const { ProfileRoute } = await import("@/pages/app/profile");

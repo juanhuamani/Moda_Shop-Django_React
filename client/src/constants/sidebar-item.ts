@@ -30,10 +30,10 @@ export const sidebarItems: SidebarItem[] = [
         href: paths.app.categories.path
     },
     {
-        id: 'orders',
-        title: 'Pedidos',
+        id: 'cart',
+        title: 'Cart',
         icon: ShoppingCart,
-        href: paths.app.orders.path
+        href: paths.app.cart.path
     },
     {
         id: 'customers',

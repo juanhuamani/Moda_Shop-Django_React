@@ -1,18 +1,8 @@
 import { Button } from "@/components/ui"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card"
-import { ProductCard } from "./components/ProductCard"
-
-interface Product {
-  id: number
-  name: string
-  price: string
-  image: string
-  originalPrice?: string
-  discount?: string
-  rating?: number
-  reviews?: number
-  isNew?: boolean
-}
+import { ProductCard } from "../../../common/ProductCard"
+import { Product } from "@/types/Product"
+import { v4 as uuidv4 } from "uuid"
 
 interface TrendingProductsProps {
   products: Product[]
@@ -35,7 +25,7 @@ export function TrendingProducts({ products }: TrendingProductsProps) {
       <CardContent>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+            <ProductCard key={uuidv4()} product={product} />
           ))}
         </div>
       </CardContent>

@@ -2,8 +2,6 @@ import axios, { AxiosInstance } from 'axios';
 import Cookies from 'js-cookie';
 
 const baseUrl: string = import.meta.env.VITE_API_URL as string;
-const accessToken: string | undefined = Cookies.get('access_token');
-//const refreshToken: string | undefined = Cookies.get('refresh_token');
 
 export const publicApi: AxiosInstance = axios.create({
   baseURL: baseUrl + '/public',
@@ -26,6 +24,14 @@ export const protectedApi: AxiosInstance = axios.create({
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${accessToken}`
+    Authorization: `Bearer ${Cookies.get('access_token')}`
   }
-});  
+});
+
+protectedApi.interceptors.request.use((config) => {
+  const token = Cookies.get("access_token");
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`; 
+  }
+  return config;
+});

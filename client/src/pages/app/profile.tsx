@@ -1,8 +1,11 @@
 import { ProfileContent } from "@/components/pages/app/profile/ProfileContent";
 import { ProfileSidebar } from "@/components/pages/app/profile/ProfileSidebar";
+import { AnimatedPage } from "@/components/layouts/AnimatedPage";
+
 
 export function ProfileRoute() {
   return (
+    <AnimatedPage>
     <div className="min-h-screen bg-secondary p-4 md:p-8">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
@@ -18,5 +21,6 @@ export function ProfileRoute() {
         </div>
       </div>
     </div>
+    </AnimatedPage>
   );
 }

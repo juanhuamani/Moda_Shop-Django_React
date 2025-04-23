@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -32,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,6 +43,7 @@ INSTALLED_APPS = [
     'accounts',
     'shop_app',
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
 ]
 
@@ -71,6 +74,18 @@ TEMPLATES = [
         },
     },
 ]
+
+JAZZMIN_SETTINGS = {
+    "site_title": "Ecommerce Admin",
+    "site_header": "Ecommerce",
+    "site_brand": "Ecommerce",
+    "welcome_sign": "Welcome to the Ecommerce Admin",
+
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "theme": "sandstone",
+}
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
@@ -122,6 +137,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

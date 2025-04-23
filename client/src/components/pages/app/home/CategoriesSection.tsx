@@ -1,12 +1,7 @@
-import { Badge, Button } from "@/components/ui"
+import { Badge, Button, Image } from "@/components/ui"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
 import { ArrowRight, ChevronRight } from "lucide-react"
-
-interface Category {
-  name: string
-  icon: string
-  count: number
-}
+import { Category } from "@/types/Categories"
 
 interface CategoriesSectionProps {
   categories: Category[]
@@ -28,7 +23,7 @@ export function CategoriesSection({ categories }: CategoriesSectionProps) {
           >
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[hsl(224,34%,25%)] text-xl">
-                {category.icon}
+                <Image src={category.image} alt={category.name} className="rounded-md" />
               </div>
               <span className="font-medium text-[hsl(215,100%,92%)]">{category.name}</span>
             </div>

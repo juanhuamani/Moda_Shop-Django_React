@@ -1,7 +1,18 @@
 from rest_framework import serializers
-from .models import CartItem, Product, Cart
+from .models import CartItem, Product, Cart, Category
+
+class CategorySerializer(serializers.ModelSerializer):
+    count = serializers.SerializerMethodField()
+    class Meta:
+        model = Category
+        fields = ['name', 'slug', 'image', 'description', 'count']
+
+    def get_count(self, obj):
+        return Product.objects.filter(category=obj).count()
+        
 
 class ProductSerializer(serializers.ModelSerializer):
+    category = serializers.StringRelatedField()
     class Meta:
         model = Product
         fields = ['id', 'name', 'slug', 'price', 'description', 'category', 'image']
@@ -32,7 +43,7 @@ class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ['id', 'cart_code', 'created_at', 'sum_total', 'num_of_items', 'updated_at', 'items']
+        fields = ['id', 'created_at', 'sum_total', 'num_of_items', 'updated_at', 'items']
     
     def get_sum_total(self, obj):
         return sum(item.product.price * item.quantity for item in obj.cart_items.all())

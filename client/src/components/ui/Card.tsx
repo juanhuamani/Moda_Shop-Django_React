@@ -11,7 +11,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-xl border shadow-sm",
+      "rounded-xl border shadow-sm overflow-auto",
       {
         "bg-secondary-light border-secondary text-tertiary": 
           variant === "default",

@@ -5,6 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useForm, SubmitHandler } from "react-hook-form"
 import { authApi } from "@/axios/BaseAxios";
 import { useUser } from "@/context/user-context";
+import { useAuth } from "@/context/auth-context";
 
 interface LoginFormProps {
   onSuccess: () => void;
@@ -17,6 +18,7 @@ interface Inputs {
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
   const { login } = useUser();
+  const { refreshAuth } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const { register, handleSubmit, formState: { errors }, } = useForm({
     defaultValues: {
@@ -32,7 +34,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
         console.log(response.data);
         const { user } = response.data;
         if (user) {
-          login(user);  
+          login(user);
+          refreshAuth();  
         }
         onSuccess();
       })
