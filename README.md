@@ -34,8 +34,8 @@ Modern e-commerce platform with a decoupled architecture featuring a React-based
 ## Getting Started 🚀
 
 ### Prerequisites
-- Python 3.11+
-- PostgreSQL 15+
+- 🐍 **Python 3.11+**: Lenguaje base para el backend Django.
+- 🧰 **Npm**: Necesario para correr el cliente React y manejar dependencias.
 
 ### Installation
 
