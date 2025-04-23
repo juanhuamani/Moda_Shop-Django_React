@@ -42,8 +42,8 @@ Modern e-commerce platform with a decoupled architecture featuring a React-based
 
 1. Clone repository:
    ```bash
-   git clone [https://github.com/your-username/ecommerce-platform.git](https://github.com/juanhuamani/Auth--React-Django)
-   cd ecommerce-platform
+   git clone "https://github.com/juanhuamani/Moda_Shop-Django_React"
+   cd Moda_Shop-Django_React
 
 2. Client Setup:
    ```bash
@@ -58,7 +58,6 @@ Modern e-commerce platform with a decoupled architecture featuring a React-based
    source venv/bin/activate  # Linux/MacOS
    venv\Scripts\activate    # Windows
    pip install -r requirements.txt
-   cp .env.example .env
    python manage.py migrate
 
 ### Configuration ⚙️
