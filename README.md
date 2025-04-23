@@ -4,7 +4,7 @@
 [![React](https://img.shields.io/badge/React-18.2-%2361DAFB)](https://react.dev/)
 [![Django](https://img.shields.io/badge/Django-4.2-brightgreen)](https://www.djangoproject.com/)
 
-Modern e-commerce platform with a decoupled architecture featuring a React-based client and multi-backend support (Django & Node.js).
+Modern e-commerce platform with a decoupled architecture featuring a React-based client and multi-backend support (Django).
 
 ## Features ✨
 
