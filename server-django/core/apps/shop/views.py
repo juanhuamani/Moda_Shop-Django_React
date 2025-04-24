@@ -14,14 +14,21 @@ class ProductView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, slug=None):
-        if slug:
-            product = Product.objects.get(slug=slug)
-            serializer = DetailedProductSerializer(product)
-            return Response({'product': serializer.data}, status=status.HTTP_200_OK)
+        try:
+            if slug:
+                product = Product.objects.get(slug=slug)
+                serializer = DetailedProductSerializer(product)
+                return Response({'product': serializer.data}, status=status.HTTP_200_OK)
+            
+            products = Product.objects.all()
+            serializer = ProductSerializer(products, many=True)
+            return Response({'products': serializer.data}, status=status.HTTP_200_OK)
+
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
         
-        products = Product.objects.all()
-        serializer = ProductSerializer(products, many=True)
-        return Response({'products': serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request):
         serializer = ProductSerializer(data=request.data)
@@ -96,6 +103,7 @@ class PopularProductsThisWeek(APIView):
         serializer = ProductSerializer(popular_products, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class CartView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -109,6 +117,7 @@ class CartView(APIView):
         except Cart.DoesNotExist:
             return Response({'message': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
 
+
 class CartItemView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -116,21 +125,22 @@ class CartItemView(APIView):
         try:
             user = request.user
             product_id = request.data.get('product_id')
-
-            cart, created = Cart.objects.get_or_create(paid=False, user=user)
             product = Product.objects.get(id=product_id)
-            
-            cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-            if not created:
-                cart_item.quantity += 1
-                cart_item.save()
+            cart, _ = Cart.objects.get_or_create(paid=False, user=user)
 
-    
-            serializer = CartItemSerializer(cart_item)
+            serializer = CartItemSerializer(data={'product': product.id, 'quantity': 1}, context={'cart': cart})
+            
+            serializer.is_valid(raise_exception=True)
+            cart_item = serializer.save()
+
+
             return Response({
-                'cart_item': serializer.data,
+                'cart_item': CartItemSerializer(cart_item).data,
                 'message': 'Item added to cart successfully'
             }, status=status.HTTP_201_CREATED)
+
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -140,17 +150,32 @@ class CartItemView(APIView):
             user = request.user
             cart_item_id = request.data.get('cart_item_id')
             quantity = request.data.get('quantity')
+
+            if not cart_item_id or not quantity:
+                return Response({'error': 'Missing cart_item_id or quantity'}, status=status.HTTP_400_BAD_REQUEST)
+
+            if quantity <= 0:
+                return Response({'error': 'Quantity must be greater than zero'}, status=400)
+
             cart = Cart.objects.get(user=user, paid=False)
             cart_item = CartItem.objects.get(id=cart_item_id , cart=cart)
-            cart_item.quantity = quantity
-            cart_item.save()
 
-            serializer = CartSerializer(cart)
+            serializer = CartItemSerializer(cart_item, data={'quantity': quantity}, context={'cart': cart})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+
+            cart_serializer  = CartSerializer(cart)
 
             return Response({
-               'cart': serializer.data,
+               'cart': cart_serializer.data,
                'message': 'Item quantity updated successfully' 
             } , status=status.HTTP_200_OK)
+
+        except CartItem.DoesNotExist:
+            return Response({'error': 'Cart item not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        except Cart.DoesNotExist:
+            return Response({'error': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
 
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -168,10 +193,17 @@ class CartItemView(APIView):
                 'cart': serializer.data
                 }, status=status.HTTP_200_OK)
 
+        except CartItem.DoesNotExist:
+            return Response({'error': 'Cart item not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        except Cart.DoesNotExist:
+            return Response({'error': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
+
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-class ClearCartView(APIView):
+
+class ClearCartView(APIView):           
     def delete(self, request):
         try:
             user = request.user
