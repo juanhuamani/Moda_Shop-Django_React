@@ -36,25 +36,8 @@ class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = ['id', 'product', 'quantity']
-    
-    def create(self, validated_data):
-        cart = self.context['cart']
-        product = validated_data['product']
 
-        cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-
-        if not created:
-            cart_item.quantity += 1
-            cart_item.save()
-
-        return cart_item
-    
-    def update(self, instance, validated_data):
-        instance.quantity = validated_data.get('quantity', instance.quantity)
-        instance.save()
-        return instance
-
-
+        
 class CartSerializer(serializers.ModelSerializer):
     items = CartItemSerializer(many=True, source='cart_items', read_only=True)
     sum_total = serializers.SerializerMethodField()

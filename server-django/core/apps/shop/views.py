@@ -8,7 +8,7 @@ from datetime import timedelta
 
 from .models import Product, Cart, CartItem, Category
 from .serializers import CartItemSerializer, DetailedProductSerializer, ProductSerializer, CartSerializer, CategorySerializer
-
+from services.cart_service import CartService
 
 class ProductView(APIView):
     permission_classes = [IsAuthenticated]
@@ -38,17 +38,31 @@ class ProductView(APIView):
         return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, slug):
-        product = Product.objects.get(slug=slug)
-        serializer = ProductSerializer(product, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'product': serializer.data}, status=status.HTTP_200_OK)
-        return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            product = Product.objects.get(slug=slug)
+            serializer = ProductSerializer(product, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({'product': serializer.data}, status=status.HTTP_200_OK)
+            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
     def delete(self, request, slug):
-        product = Product.objects.get(slug=slug)
-        product.delete()
-        return Response({'message': 'Product deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        try:
+            product = Product.objects.get(slug=slug)
+            product.delete()
+            return Response({'message': 'Product deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+        except Product.DoesNotExist:
+            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CategoryListView(APIView):
@@ -108,114 +122,56 @@ class CartView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        try:
-            user = request.user
-            cart = Cart.objects.get(user=user, paid=False)
-            serializer = CartSerializer(cart)
-            return Response({'cart': serializer.data}, status=status.HTTP_200_OK)
-            
-        except Cart.DoesNotExist:
-            return Response({'message': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
+        cart = CartService.get_cart(request.user)
+        serializer = CartSerializer(cart)
+        return Response({'cart': serializer.data}, status=status.HTTP_200_OK)
 
 
 class CartItemView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        try:
-            user = request.user
-            product_id = request.data.get('product_id')
-            product = Product.objects.get(id=product_id)
-            cart, _ = Cart.objects.get_or_create(paid=False, user=user)
+        user = request.user
+        product_id = request.data.get('product_id')
 
-            serializer = CartItemSerializer(data={'product': product.id, 'quantity': 1}, context={'cart': cart})
-            
-            serializer.is_valid(raise_exception=True)
-            cart_item = serializer.save()
+        if not product_id:
+            return Response({'error': 'Missing product_id'}, status=400)
 
+        product = CartService.get_product(product_id)
+        cart, _ = CartService.get_or_create_cart(user)
+        cart_item = CartService.add_product(cart, product)
 
-            return Response({
-                'cart_item': CartItemSerializer(cart_item).data,
-                'message': 'Item added to cart successfully'
-            }, status=status.HTTP_201_CREATED)
-
-        except Product.DoesNotExist:
-            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'cart_item': CartItemSerializer(cart_item).data,
+            'message': 'Item added to cart successfully'
+        }, status=status.HTTP_201_CREATED)
         
     def put(self, request):
-        try:
-            user = request.user
-            cart_item_id = request.data.get('cart_item_id')
-            quantity = request.data.get('quantity')
+        user = request.user
+        cart_item_id = request.data.get('cart_item_id')
+        quantity = request.data.get('quantity')
 
-            if not cart_item_id or not quantity:
-                return Response({'error': 'Missing cart_item_id or quantity'}, status=status.HTTP_400_BAD_REQUEST)
+        cart = CartService.get_cart(user)
+        CartService.update_cart_item_quantity(cart, cart_item_id, int(quantity))
 
-            if quantity <= 0:
-                return Response({'error': 'Quantity must be greater than zero'}, status=400)
-
-            cart = Cart.objects.get(user=user, paid=False)
-            cart_item = CartItem.objects.get(id=cart_item_id , cart=cart)
-
-            serializer = CartItemSerializer(cart_item, data={'quantity': quantity}, context={'cart': cart})
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-
-            cart_serializer  = CartSerializer(cart)
-
-            return Response({
-               'cart': cart_serializer.data,
-               'message': 'Item quantity updated successfully' 
-            } , status=status.HTTP_200_OK)
-
-        except CartItem.DoesNotExist:
-            return Response({'error': 'Cart item not found'}, status=status.HTTP_404_NOT_FOUND)
-        
-        except Cart.DoesNotExist:
-            return Response({'error': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+           'cart': CartSerializer(cart).data,
+           'message': 'Item quantity updated successfully' 
+        } , status=status.HTTP_200_OK)
 
     def delete(self, request, item_id):
-        try:
-            user = request.user
-            cart = Cart.objects.get(user=user, paid=False)
-            cart_item = CartItem.objects.get(id=item_id, cart=cart)
-            cart_item.delete()
-            serializer = CartSerializer(cart)
+        user = request.user
+        cart = Cart.objects.get(user=user, paid=False)
+        CartService.delete_cart_item(cart, item_id)
 
-            return Response({
-                'message': 'Item removed from cart successfully',
-                'cart': serializer.data
-                }, status=status.HTTP_200_OK)
-
-        except CartItem.DoesNotExist:
-            return Response({'error': 'Cart item not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        except Cart.DoesNotExist:
-            return Response({'error': 'Cart not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            'message': 'Item removed from cart successfully',
+            'cart': CartSerializer(cart).data
+            }, status=status.HTTP_200_OK)
 
 
 class ClearCartView(APIView):           
     def delete(self, request):
-        try:
-            user = request.user
-            cart = Cart.objects.get(user=user, paid=False)
-
-            cart.delete()
-
-            return Response({'message': 'Carrito eliminado exitosamente.'}, status=status.HTTP_204_NO_CONTENT)
-
-        except Cart.DoesNotExist:
-            return Response({'error': 'No se encontró un carrito activo para este usuario.'},
-                            status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        CartService.clear_cart(request.user)
+        return Response({'message': 'Carrito eliminado exitosamente.'}, status=status.HTTP_204_NO_CONTENT)
         
