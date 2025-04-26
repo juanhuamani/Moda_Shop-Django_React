@@ -8,7 +8,7 @@ from datetime import timedelta
 
 from .models import Product, Cart, CartItem, Category
 from .serializers import CartItemSerializer, DetailedProductSerializer, ProductSerializer, CartSerializer, CategorySerializer
-from services.cart_service import CartService
+from .services.cart_service import CartService
 
 class ProductView(APIView):
     permission_classes = [IsAuthenticated]
@@ -18,11 +18,11 @@ class ProductView(APIView):
             if slug:
                 product = Product.objects.get(slug=slug)
                 serializer = DetailedProductSerializer(product)
-                return Response({'product': serializer.data}, status=status.HTTP_200_OK)
+                return Response({'message': 'Product details retrieved successfully', 'product': serializer.data}, status=status.HTTP_200_OK)
             
             products = Product.objects.all()
             serializer = ProductSerializer(products, many=True)
-            return Response({'products': serializer.data}, status=status.HTTP_200_OK)
+            return Response({'message': 'Products list retrieved successfully', 'products': serializer.data}, status=status.HTTP_200_OK)
 
         except Product.DoesNotExist:
             return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -34,7 +34,7 @@ class ProductView(APIView):
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({'product': serializer.data}, status=status.HTTP_201_CREATED)
+            return Response({'message': 'Product created successfully', 'product': serializer.data}, status=status.HTTP_201_CREATED)
         return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, slug):
@@ -43,7 +43,7 @@ class ProductView(APIView):
             serializer = ProductSerializer(product, data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response({'product': serializer.data}, status=status.HTTP_200_OK)
+                return Response({'message': 'Product updated successfully', 'product': serializer.data}, status=status.HTTP_200_OK)
             return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         
         except Product.DoesNotExist:
@@ -72,7 +72,7 @@ class CategoryListView(APIView):
         categories = Category.objects.annotate(count=Count('product')).order_by('-count')[:5]
         serializer = CategorySerializer(categories, many=True)
         
-        return Response({'categories': serializer.data}, status=status.HTTP_200_OK)
+        return Response({'message': 'Categories retrieved successfully', 'categories': serializer.data}, status=status.HTTP_200_OK)
 
 
 class CategoryDetailView(APIView):
@@ -84,9 +84,9 @@ class CategoryDetailView(APIView):
             products = Product.objects.filter(category=category)
             serializer = ProductSerializer(products, many=True)
 
-            return Response({'products': serializer.data}, status=status.HTTP_200_OK)
+            return Response({'message': 'Category products retrieved successfully', 'products': serializer.data}, status=status.HTTP_200_OK)
         
-        return Response({'error': 'Invalid category slug'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'Category not found', 'error': 'Invalid category slug'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class FeaturedProductView(APIView):
@@ -96,7 +96,7 @@ class FeaturedProductView(APIView):
         if featured_product:
             serializer = ProductSerializer(featured_product)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response({'detail': 'No hay productos'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'message': 'No products available', 'detail': 'No products available'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class PopularProductsThisWeek(APIView):
@@ -115,7 +115,7 @@ class PopularProductsThisWeek(APIView):
         popular_products = Product.objects.filter(id__in=popular_product_ids)
 
         serializer = ProductSerializer(popular_products, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({'message': 'Popular products retrieved successfully', 'products': serializer.data}, status=status.HTTP_200_OK)
 
 
 class CartView(APIView):
@@ -124,7 +124,7 @@ class CartView(APIView):
     def get(self, request):
         cart = CartService.get_cart(request.user)
         serializer = CartSerializer(cart)
-        return Response({'cart': serializer.data}, status=status.HTTP_200_OK)
+        return Response({'message': 'Cart retrieved successfully', 'cart': serializer.data}, status=status.HTTP_200_OK)
 
 
 class CartItemView(APIView):
@@ -173,5 +173,5 @@ class CartItemView(APIView):
 class ClearCartView(APIView):           
     def delete(self, request):
         CartService.clear_cart(request.user)
-        return Response({'message': 'Carrito eliminado exitosamente.'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'message': 'Cart cleared successfully.'}, status=status.HTTP_204_NO_CONTENT)
         

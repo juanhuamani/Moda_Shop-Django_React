@@ -1,7 +1,5 @@
-# services/cart_service.py
-
 from django.shortcuts import get_object_or_404
-from carts.models import Cart, CartItem, Product
+from ..models import Cart, CartItem, Product
 
 class CartService:
 
