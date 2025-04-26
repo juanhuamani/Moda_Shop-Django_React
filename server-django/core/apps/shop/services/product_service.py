@@ -35,23 +35,4 @@ class ProductService:
     def delete_product(product):
         CartItem.objects.filter(product=product).delete()
         product.delete()
-
-    
-        queryset = Product.objects.all()
-        
-        if category := filters.get('category'):
-            queryset = queryset.filter(category__slug=category)
-        if min_price := filters.get('min_price'):
-            queryset = queryset.filter(price__gte=min_price)
-        if max_price := filters.get('max_price'):
-            queryset = queryset.filter(price__lte=max_price)
-        if created_after := filters.get('created_after'):
-            queryset = queryset.filter(created_at__gte=created_after)
-        
-        if search_query := filters.get('search'):
-            queryset = queryset.filter(
-                Q(name__icontains=search_query) |
-                Q(description__icontains=search_query)
-            )
-        
-        return queryset.order_by('-created_at')
+        return True
