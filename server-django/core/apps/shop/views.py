@@ -1,4 +1,4 @@
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,43 +9,40 @@ from datetime import timedelta
 from .models import Product, Cart, CartItem, Category
 from .serializers import CartItemSerializer, DetailedProductSerializer, ProductSerializer, CartSerializer, CategorySerializer
 from .services.cart_service import CartService
+from .services.product_service import ProductService
 
 
 class ProductView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminUser]
 
     def get(self, request, slug=None):
         try:
             if slug:
-                product = Product.objects.get(slug=slug)
+                product = ProductService.get_product_by_slug(slug)
                 serializer = DetailedProductSerializer(product)
                 return Response({'message': 'Product details retrieved successfully', 'product': serializer.data}, status=status.HTTP_200_OK)
 
-            products = Product.objects.all()
+            products = ProductService.get_all_products()
             serializer = ProductSerializer(products, many=True)
             return Response({'message': 'Products list retrieved successfully', 'products': serializer.data}, status=status.HTTP_200_OK)
-
-        except Product.DoesNotExist:
-            return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
-
+            
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request):
-        serializer = ProductSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'message': 'Product created successfully', 'product': serializer.data}, status=status.HTTP_201_CREATED)
-        return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            product = ProductService.create_product(request.data)
+            serializer = ProductSerializer(product)
+            return Response({'message': 'Product created successfully','product': serializer.data}, status=status.HTTP_201_CREATED)
+        except ValueError as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, slug):
         try:
-            product = Product.objects.get(slug=slug)
-            serializer = ProductSerializer(product, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response({'message': 'Product updated successfully', 'product': serializer.data}, status=status.HTTP_200_OK)
-            return Response({'error': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            product = ProductService.get_product_by_slug(slug)
+            updated_product = ProductService.update_product(product, request.data)
+            serializer = ProductSerializer(updated_product)
+            return Response({'message': 'Product updated successfully','product': serializer.data}, status=status.HTTP_200_OK)
 
         except Product.DoesNotExist:
             return Response({'error': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -55,8 +52,8 @@ class ProductView(APIView):
 
     def delete(self, request, slug):
         try:
-            product = Product.objects.get(slug=slug)
-            product.delete()
+            product = ProductService.get_product_by_slug(slug)
+            ProductService.delete_product(product)
             return Response({'message': 'Product deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
         except Product.DoesNotExist:
