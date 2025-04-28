@@ -91,7 +91,6 @@ class CategoryDetailView(APIView):
 class FeaturedProductView(APIView):
     def get(self, request):
         featured_product = Product.objects.order_by('-created_at').first()
-        print(featured_product)
         if featured_product:
             serializer = ProductSerializer(featured_product)
             return Response(serializer.data, status=status.HTTP_200_OK)
