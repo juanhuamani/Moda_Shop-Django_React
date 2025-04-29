@@ -110,6 +110,12 @@ class PopularProductsThisWeek(APIView):
 
         popular_product_ids = [item['product'] for item in product_counts]
 
+        if len(popular_product_ids) < 4:
+            remaining_slots = 4 - len(popular_product_ids)
+            additional_products = Product.objects.exclude(id__in=popular_product_ids) \
+                .order_by('-created_at')[:remaining_slots]
+            popular_product_ids += list(additional_products.values_list('id', flat=True))
+
         popular_products = Product.objects.filter(id__in=popular_product_ids)
 
         serializer = ProductSerializer(popular_products, many=True)
