@@ -9,9 +9,9 @@ export const UserAvatar = ({
 }) => {
   const { user } = useUser();
   const avatarUrl = user?.avatar?.startsWith("http")
-    ? `${import.meta.env.VITE_API_URL}/avatars/${user.avatar}`
-    : "/default-avatar.png";
-
+    ? user.avatar
+    : `${import.meta.env.VITE_API_URL}/${user?.avatar}`
+    
   return (
     <Avatar className={cn(
       "h-12 w-12",

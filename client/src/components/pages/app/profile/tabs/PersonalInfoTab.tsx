@@ -1,6 +1,7 @@
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import {
   Card,
   CardContent,
@@ -27,7 +28,7 @@ export function PersonalInfoTab() {
   const [isEditing, setIsEditing] = useState(false);
 
   const handleSaveProfile = () => {
-    // Aquí iría la lógica para guardar los cambios en el servidor
+
     setIsEditing(false);
   };
 
@@ -57,6 +58,19 @@ function ProfileInfoCard({
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
   handleSaveProfile: () => void;
 }) {
+  const { register, handleSubmit, reset } = useForm<UserType>({
+    defaultValues: user,
+  });
+
+  useEffect(() => {
+    reset(user);
+  }, [user, reset]);
+
+  const onSubmit = (data: UserType) => {
+    console.log("Datos guardados:", data);
+    handleSaveProfile();
+  };
+
   return (
     <Card className="bg-secondary-light border-secondary">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -88,7 +102,7 @@ function ProfileInfoCard({
               Cancelar
             </Button>
             <Button
-              onClick={handleSaveProfile}
+              onClick={handleSubmit(onSubmit)}
               className="bg-primary text-tertiary hover:bg-primary/90"
             >
               <Save className="mr-2 h-4 w-4" />
@@ -105,17 +119,15 @@ function ProfileInfoCard({
             </Label>
             <div className="flex flex-row gap-2">
               <Input
+                {...register("first_name")}
                 id="first_name"
-                name="first_name"
-                value={user.first_name}
                 disabled={!isEditing}
                 className="bg-secondary border-secondary text-tertiary"
                 icon={<User className="h-4 w-4 text-tertiary/70" />}
               />
               <Input
+                {...register("last_name")}
                 id="last_name"
-                name="last_name"
-                value={user.last_name}
                 disabled={!isEditing}
                 className="bg-secondary border-secondary text-tertiary"
                 icon={<User className="h-4 w-4 text-tertiary/70" />}
@@ -127,10 +139,9 @@ function ProfileInfoCard({
               Correo electrónico
             </Label>
             <Input
+              {...register("email")}
               id="email"
-              name="email"
               type="email"
-              value={user.email}
               disabled={!isEditing}
               className="bg-secondary border-secondary text-tertiary"
               icon={<Mail className="h-4 w-4 text-tertiary/70" />}
@@ -141,9 +152,8 @@ function ProfileInfoCard({
               Teléfono
             </Label>
             <Input
+              {...register("phone")}
               id="phone"
-              name="phone"
-              value={user.phone}
               disabled={!isEditing}
               className="bg-secondary border-secondary text-tertiary"
               icon={<Phone className="h-4 w-4 text-tertiary/70" />}
@@ -154,9 +164,8 @@ function ProfileInfoCard({
               Ubicación
             </Label>
             <Input
-              id="location"
-              name="location"
-              //value={user.location}
+              {...register("address")}
+              id="address"
               disabled={!isEditing}
               className="bg-secondary border-secondary text-tertiary"
               icon={<MapPin className="h-4 w-4 text-tertiary/70" />}

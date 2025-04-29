@@ -33,7 +33,7 @@ export function HomePage() {
         if (categories) setCategories(categories);
   
         if (featuredRes.data) setProductFeatured(featuredRes.data);
-        if (popularRes.data) setProductsPopular(popularRes.data);
+        if (popularRes.data) setProductsPopular(popularRes.data.products);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -51,7 +51,7 @@ export function HomePage() {
         <CategoriesSection categories={categories} />
         {productFeatured && <FeaturedProduct product={productFeatured} />}
         <SpecialOffer />
-        <TrendingProducts products={productsPopular} />
+        {productsPopular && <TrendingProducts products={productsPopular} />}
         <BenefitsSection />
       </div>
 

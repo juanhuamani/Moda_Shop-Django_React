@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar";
+import { UserAvatar } from "@/components/ui/UserAvatar";
 import { Badge, Button } from "@/components/ui";
 import {
   Card,
@@ -61,6 +61,7 @@ function ProfileCard({
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  
   const handleAvatarUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -87,29 +88,21 @@ function ProfileCard({
       setIsUploading(false);
     }
   };
-  console.log(user);
+
   return (
     <Card className="bg-secondary-light border-secondary">
       <CardContent className="p-6">
         <div className="flex flex-col items-center text-center">
-          <div className="relative mb-4">
-            <Avatar className="h-20 w-20">
-              {isUploading ? (
-                <div className="absolute inset-0 flex items-center justify-center bg-secondary/50">
+        <div className="relative mb-4">
+            <div className="relative">
+              {isUploading && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-secondary/50 rounded-full">
                   <Spinner className="h-8 w-8 text-tertiary" />
                 </div>
-              ) : null}
-              <AvatarImage
-                src={user?.avatar?.startsWith("http") ? user.avatar : `${import.meta.env.VITE_API_URL}/avatars/${user.avatar}`}
-                alt="Avatar"
-                />
-              <AvatarFallback className="bg-primary text-tertiary">
-                {user.first_name[0]}
-                {user.last_name[0]}
-              </AvatarFallback>
-            </Avatar>
+              )}
+              <UserAvatar size="xl" />
+            </div>
 
-            {/* Input de archivo oculto */}
             <input
               type="file"
               ref={fileInputRef}
@@ -132,7 +125,7 @@ function ProfileCard({
           <p className="text-sm text-tertiary/70">{user.email}</p>
           <div className="mt-2">
             <Badge className="bg-primary text-tertiary">
-              
+              {user.username}
             </Badge>
           </div>
         </div>
