@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from .models import User
 from django.db.models import Q
+from django.contrib.auth.password_validation import validate_password
 
 class RegisterSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField( write_only=True)
@@ -62,3 +63,25 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name', 'phone', 'birthdate', 'location', 'avatar']
+
+
+class PasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(required=True)
+    newPassword = serializers.CharField(required=True, validators=[validate_password])
+    confirmPassword = serializers.CharField(required=True)
+
+    def validate(self, data):
+        user = self.context['request'].user
+
+        if not user.check_password(data['password']):
+            raise serializers.ValidationError({"password": "La contraseña actual no es correcta"})
+
+        if data['newPassword'] != data['confirmPassword']:
+            raise serializers.ValidationError({"confirmPassword": "Las contraseñas no coinciden"})
+
+        return data
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data['newPassword'])
+        instance.save()
+        return instance

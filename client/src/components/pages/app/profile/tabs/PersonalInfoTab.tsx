@@ -22,8 +22,7 @@ import {
 } from "lucide-react";
 import { useUser } from "@/context/user-context";
 import { User as UserType } from "@/types/User";
-import { authApi } from "@/axios/BaseAxios";
-import Cookies from "js-cookie";
+import { authAuthenticatedApi } from "@/axios/BaseAxios";
 import { toast } from "react-toastify";
 
 export function PersonalInfoTab() {
@@ -72,7 +71,6 @@ function ProfileInfoCard({
   }, [user, reset]);
 
   const onSubmit = (data: UserType) => {
-    const token = Cookies.get("access_token");
     const updatedData: Partial<UserType> = {};
 
     Object.keys(data).forEach((key) => {
@@ -83,15 +81,11 @@ function ProfileInfoCard({
     });
 
     if (Object.keys(updatedData).length > 0) {
-      authApi
-        .put(`/profile/update`, updatedData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      authAuthenticatedApi
+        .put(`/profile/update`, updatedData)
       .then((response) => {
         uploadUser(response.data.user);
-        toast.success('Usuario actualizado',{
+        toast.success('Informacion actualizada',{
           position: "bottom-right",
           autoClose: 5000,
           hideProgressBar: false,
@@ -122,6 +116,11 @@ function ProfileInfoCard({
     }
   };
 
+  const handleReset = () => {
+    reset(user);
+    setIsEditing(false);
+  };
+
   return (
     <Card className="bg-secondary-light border-secondary">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -146,7 +145,7 @@ function ProfileInfoCard({
           <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={() => setIsEditing(false)}
+              onClick={handleReset}
               className="border-secondary text-tertiary hover:bg-secondary hover:text-tertiary"
             >
               <X className="mr-2 h-4 w-4" />

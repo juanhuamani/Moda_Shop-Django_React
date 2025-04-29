@@ -2,7 +2,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button, Input, Label, Switch, Badge } from "@/components/ui"
 import { Lock } from "lucide-react"
 import { useForm } from "react-hook-form";
-import { protectedApi } from "@/axios/BaseAxios";
+import { useState } from "react";
+import { authAuthenticatedApi } from "@/axios/BaseAxios";
+import { showSuccessToast, showErrorToast } from '@/utils/toast';
 
 export function SecurityTab() {
   return (
@@ -15,7 +17,8 @@ export function SecurityTab() {
 }
 
 function PasswordCard() {
-  const { register, watch, formState: { errors }, handleSubmit } = useForm({
+  const [isloading, setIsloading] = useState(false);
+  const { register, watch, formState: { errors }, handleSubmit, setError, reset } = useForm({
     defaultValues: {
       password: "",
       newPassword: "",
@@ -23,17 +26,30 @@ function PasswordCard() {
     },
   });
 
-  const onSubmit = (data: any) => {
-    console.log(data);
-    const { password, newPassword } = data;
-    protectedApi.post("/user/change-password", { password, newPassword })
-      .then((response) => {
-        console.log(response.data);
+  const onSubmit = (data: { password: string; newPassword: string; confirmPassword: string }) => {
+    setIsloading(true);
+    authAuthenticatedApi.put("/password/change", data)
+      .then(() => {
+        showSuccessToast("Contraseña actualizada");
+        reset();
       }
       ).catch((error) => {
-        console.error(error);
-      }
-    );
+        if (error.response?.data) {
+          const { data } = error.response;
+          for (const key in data) {
+            const errorMessage = data[key][0];
+            setError(key as "password" | "newPassword" | "confirmPassword", {
+              type: "manual",
+              message: errorMessage,
+            });
+          }
+        }
+        else {
+          showErrorToast('Error al actualizar la contrasena', { autoClose: 7000 });
+        }
+      }).finally(() => {
+        setIsloading(false);
+      });
   }
 
   return (
@@ -106,7 +122,7 @@ function PasswordCard() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" className="bg-primary text-tertiary hover:bg-secondary">Actualizar contraseña</Button>
+          <Button type="submit" className="bg-primary text-tertiary hover:bg-secondary" isLoading={isloading}>Actualizar contraseña</Button>
         </CardFooter>
       </Card>
     </form>

@@ -19,6 +19,15 @@ export const authApi: AxiosInstance = axios.create({
   }
 });
 
+export const authAuthenticatedApi: AxiosInstance = axios.create({
+  baseURL: baseUrl + '/auth',
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${Cookies.get('access_token')}`
+  }
+})
+
 export const protectedApi: AxiosInstance = axios.create({
   baseURL: baseUrl + '/api',
   withCredentials: true,
