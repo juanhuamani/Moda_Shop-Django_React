@@ -34,7 +34,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30, blank=True, verbose_name='first name')
     last_name = models.CharField(max_length=30, blank=True, verbose_name='last name')
     phone = models.CharField(max_length=20, null=True, blank=True, verbose_name='phone')
-    address = models.CharField(max_length=255, null=True, blank=True, verbose_name='address')
     birthdate = models.DateField(null=True, blank=True, verbose_name='birthdate')
     location = models.CharField(max_length=100, null=True, blank=True, verbose_name='location')
 

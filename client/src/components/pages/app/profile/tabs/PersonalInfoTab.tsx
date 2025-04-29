@@ -22,13 +22,15 @@ import {
 } from "lucide-react";
 import { useUser } from "@/context/user-context";
 import { User as UserType } from "@/types/User";
+import { authApi } from "@/axios/BaseAxios";
+import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 
 export function PersonalInfoTab() {
-  const { user } = useUser();
+  const { user, uploadUser } = useUser();
   const [isEditing, setIsEditing] = useState(false);
 
   const handleSaveProfile = () => {
-
     setIsEditing(false);
   };
 
@@ -37,6 +39,7 @@ export function PersonalInfoTab() {
       {user && (
         <ProfileInfoCard
           user={user}
+          uploadUser={uploadUser}
           isEditing={isEditing}
           setIsEditing={setIsEditing}
           handleSaveProfile={handleSaveProfile}
@@ -52,13 +55,15 @@ function ProfileInfoCard({
   isEditing,
   setIsEditing,
   handleSaveProfile,
+  uploadUser,
 }: {
   user: UserType;
   isEditing: boolean;
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
   handleSaveProfile: () => void;
+  uploadUser: (user: UserType) => void;
 }) {
-  const { register, handleSubmit, reset } = useForm<UserType>({
+  const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<UserType>({
     defaultValues: user,
   });
 
@@ -67,8 +72,54 @@ function ProfileInfoCard({
   }, [user, reset]);
 
   const onSubmit = (data: UserType) => {
-    console.log("Datos guardados:", data);
-    handleSaveProfile();
+    const token = Cookies.get("access_token");
+    const updatedData: Partial<UserType> = {};
+
+    Object.keys(data).forEach((key) => {
+      if (data[key as keyof UserType] !== user[key as keyof UserType]) {
+        //@ts-expect-error Type 'string' cannot be used as an index type for partial user data
+        updatedData[key ] = data[key as keyof UserType];
+      }
+    });
+
+    if (Object.keys(updatedData).length > 0) {
+      authApi
+        .put(`/profile/update`, updatedData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        uploadUser(response.data.user);
+        toast.success('Usuario actualizado',{
+          position: "bottom-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
+        handleSaveProfile();
+      }) 
+      .catch((error) => {
+        if (error.response?.data) {
+          const { data } = error.response;
+          for (const key in data) {
+            const errorMessage = data[key][0];
+            setError(key as keyof UserType, {
+              type: "manual",
+              message: errorMessage,
+            });
+          }
+        }
+      })
+    } else {
+      toast.info('No se han realizado cambios',{
+        position: "bottom-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
+      handleSaveProfile();
+    }
   };
 
   return (
@@ -120,6 +171,7 @@ function ProfileInfoCard({
             <div className="flex flex-row gap-2">
               <Input
                 {...register("first_name")}
+                errorMessage={errors?.first_name?.message}
                 id="first_name"
                 disabled={!isEditing}
                 className="bg-secondary border-secondary text-tertiary"
@@ -127,6 +179,7 @@ function ProfileInfoCard({
               />
               <Input
                 {...register("last_name")}
+                errorMessage={errors?.last_name?.message}
                 id="last_name"
                 disabled={!isEditing}
                 className="bg-secondary border-secondary text-tertiary"
@@ -140,6 +193,7 @@ function ProfileInfoCard({
             </Label>
             <Input
               {...register("email")}
+              errorMessage={errors?.email?.message}
               id="email"
               type="email"
               disabled={!isEditing}
@@ -153,6 +207,7 @@ function ProfileInfoCard({
             </Label>
             <Input
               {...register("phone")}
+              errorMessage={errors?.phone?.message}
               id="phone"
               disabled={!isEditing}
               className="bg-secondary border-secondary text-tertiary"
@@ -164,8 +219,9 @@ function ProfileInfoCard({
               Ubicación
             </Label>
             <Input
-              {...register("address")}
-              id="address"
+              {...register("location")}
+              errorMessage={errors?.location?.message}
+              id="location"
               disabled={!isEditing}
               className="bg-secondary border-secondary text-tertiary"
               icon={<MapPin className="h-4 w-4 text-tertiary/70" />}
@@ -176,9 +232,9 @@ function ProfileInfoCard({
               Fecha de nacimiento
             </Label>
             <Input
-              id="birthdate"
-              name="birthdate"
-              //value={user.birthdate}
+              {...register("birthdate")}
+              errorMessage={errors?.birthdate?.message}
+              id="location"
               disabled={!isEditing}
               className="bg-secondary border-secondary text-tertiary"
               icon={<Calendar className="h-4 w-4 text-tertiary/70" />}

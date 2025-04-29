@@ -1,22 +1,21 @@
-"use client"
-
 import type React from "react"
 
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { Search, Bell, Heart, ShoppingCart, Menu, X } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/Avatar"
+import { UserAvatar } from "@/components/ui/UserAvatar"
 import { Badge, Button, Input } from "@/components/ui"
 import { Tooltip } from "@/components/ui/ToolTip"
 import { Sidebar } from "./Sidebar"
 import { sidebarItems } from "@/constants/sidebar-item"
 import { useUser } from "@/context/user-context"
+import { paths } from "@/config/paths"
 
 export function GeneralLayout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { user } = useUser()
-  // Effect to prevent background scrolling when mobile menu is open
+  
   useEffect(() => {
     if (mobileMenuOpen) {
       // Save the current scroll position
@@ -154,12 +153,11 @@ export function GeneralLayout({ children }: { children: React.ReactNode }) {
                 </motion.div>
               </Tooltip>
               <div className="hidden md:block">
-                <motion.div whileHover={{ scale: 1.1 }}>
-                  <Avatar size="sm">
-                    <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Avatar" />
-                    <AvatarFallback>AD</AvatarFallback>
-                  </Avatar>
-                </motion.div>
+                <Link to={paths.app.profile.path}>
+                  <motion.div whileHover={{ scale: 1.1 }}>
+                    <UserAvatar size="md" />
+                  </motion.div>
+                </Link>
               </div>
             </div>
           </div>
@@ -233,12 +231,11 @@ export function GeneralLayout({ children }: { children: React.ReactNode }) {
                     transition={{ delay: 0.2 }}
                   >
                     <div className="flex items-center gap-3">
-                      <motion.div whileHover={{ scale: 1.1 }}>
-                        <Avatar size="sm">
-                          <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Avatar" />
-                          <AvatarFallback>AD</AvatarFallback>
-                        </Avatar>
-                      </motion.div>
+                      <Link to={paths.app.profile.path}>
+                        <motion.div whileHover={{ scale: 1.1 }}>
+                          <UserAvatar size="md"/>
+                        </motion.div>
+                      </Link>
                       <div>
                         <p className="text-sm font-medium text-[hsl(215,100%,92%)]">
                           {user?.first_name} {user?.last_name || "Usuario"}
