@@ -45,7 +45,11 @@ export function HomePage() {
   return (
     <AnimatedPage>
     <div className="p-4 md:p-6">
-      <PageHeader />
+      <PageHeader
+        breadcrumbs={[
+          { label: "Inicio", href: "/" }
+        ]}
+      />
       <div className="grid grid-cols-1 gap-6 md:grid-cols-6 lg:grid-cols-12">
         <HeroSection />
         <CategoriesSection categories={categories} />

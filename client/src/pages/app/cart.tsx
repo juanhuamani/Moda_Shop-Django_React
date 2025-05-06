@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { ChevronRight, ShoppingCart, Trash2, ArrowLeft, CreditCard } from 'lucide-react'
+import { ShoppingCart, Trash2, ArrowLeft, CreditCard } from 'lucide-react'
 import { Button, Input } from "@/components/ui"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
 
@@ -12,6 +12,7 @@ import { CartItem } from "@/types/CartItem"
 import { getCart, updateCartItem, removeFromCart, clearCart } from "@/services/cartService"
 import LoadingPage from "@/components/common/LoadingPage"
 import { AnimatedPage } from "@/components/layouts/AnimatedPage"
+import { PageHeader } from "@/components/PageHeader"
 
 export function CartPage() {
   const [items, setItems] = useState<CartItem[]>([])
@@ -130,15 +131,12 @@ export function CartPage() {
   return (
     <AnimatedPage>
       <div className="p-4 md:p-6">
-        <div className="mb-6">
-          <div className="flex items-center text-sm text-[hsl(215,100%,92%)/70]">
-            <a href="#" className="text-tertiary">
-              Inicio
-            </a>
-            <ChevronRight className="mx-2 h-4 w-4 text-tertiary" />
-            <span className="text-[hsl(215,100%,92%)]">Carrito</span>
-          </div>
-        </div>
+      <PageHeader
+        breadcrumbs={[
+          { label: "Inicio", href: "/" },
+          { label: "Carrito", href: "/app/cart" },
+        ]}
+      />
 
         <div className="mb-8 flex items-center justify-between">
           <div>

@@ -54,6 +54,11 @@ export const paths = {
       products: {
         path: "/app/products",
         getHref: () => "/app/products", 
+
+        details: {
+          path: "/app/products/:productSlug",
+          getHref: (productSlug: string) => `/app/products/${productSlug}`,
+        },
       },
       categories: {
         path: "/app/categories",

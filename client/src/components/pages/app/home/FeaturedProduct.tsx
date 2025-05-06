@@ -1,8 +1,7 @@
 import { Badge, Button, Image } from "@/components/ui"
 import { Card } from "@/components/ui/Card"
-import { Star } from "lucide-react"
 import { Product } from "@/types/Product"
-import { cn } from "@/utils/cn"
+import { Rating } from "@/components/common/Rating"
 
 import { addToCart } from "@/services/cartService"
 import { useState } from "react"
@@ -41,14 +40,7 @@ export function FeaturedProduct( { product }: { product: Product } ) {
           <div className="p-6">
             <h3 className="mb-2 text-xl font-bold text-[hsl(215,100%,92%)]">{ product.name }</h3>
             <div className="mb-3 flex items-center gap-2">
-              <div className="flex items-center">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className={cn(
-                    "h-4 w-4 text-yellow-400",
-                    i < (product.rating ?? 0) ? "fill-current" : "fill-transparent"
-                  )}/>
-                ))}
-              </div>
+              <Rating value={product.rating?? 0} />
               <span className="text-sm text-[hsl(215,100%,92%)/70]">({product.reviews ?? 0} reseñas)</span>
             </div>
             <div className="mb-4 flex items-center gap-2">

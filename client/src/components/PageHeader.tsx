@@ -1,18 +1,33 @@
-import { ChevronRight } from "lucide-react"
+import { ChevronRight } from "lucide-react";
 
-export function PageHeader() {
+interface BreadcrumbItem {
+  label: string;
+  href?: string; 
+}
+
+interface PageHeaderProps {
+  breadcrumbs: BreadcrumbItem[];
+}
+
+export function PageHeader({ breadcrumbs }: PageHeaderProps) {
   return (
-    <>
-      {/* Breadcrumb */}
-      <div className="mb-6">
-        <div className="flex items-center text-sm text-tertiary">
-          <a href="#" className="hover:text-tertiary">
-            Inicio
-          </a>
-          <ChevronRight className="mx-2 h-4 w-4" />
-          <span className="text-tertiary">Tienda</span>
-        </div>
+    <div className="mb-6">
+      <div className="flex items-center text-sm text-tertiary">
+        {breadcrumbs.map((item, index) => (
+          <div key={index} className="flex items-center">
+            {item.href ? (
+              <a href={item.href} className="hover:text-tertiary">
+                {item.label}
+              </a>
+            ) : (
+              <span className="text-tertiary">{item.label}</span>
+            )}
+            {index < breadcrumbs.length - 1 && (
+              <ChevronRight className="mx-2 h-4 w-4" />
+            )}
+          </div>
+        ))}
       </div>
-    </>
-  )
+    </div>
+  );
 }

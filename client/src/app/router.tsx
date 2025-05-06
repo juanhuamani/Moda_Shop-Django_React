@@ -84,6 +84,15 @@ export const createAppRouter = () =>
             },
           },
           {
+            path: paths.app.products.details.path,
+            lazy: async () => {
+              const { ProductDetailRoute } = await import("@/pages/app/product/details");
+              return {
+                Component: ProductDetailRoute,
+              };
+            },
+          },
+          {
             path: paths.app.cart.path,
             lazy: async () => {
               const { CartPage } = await import("@/pages/app/cart");
