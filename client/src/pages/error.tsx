@@ -1,7 +1,7 @@
 import { FC } from "react";
 import { Link } from "react-router-dom";
 import { paths } from "@/config/paths";
-import Logo from "@/assets/logo.svg";
+import Logo from "@/assets/logo.webp";
 
 export const ErrorRoute: FC = () => {
 

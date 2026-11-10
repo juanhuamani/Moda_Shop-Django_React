@@ -12,18 +12,46 @@ class CategorySerializer(serializers.ModelSerializer):
         
 
 class ProductSerializer(serializers.ModelSerializer):
+    # Read-only product category name, plus a writable foreign key.
     category = serializers.StringRelatedField()
+    category_id = serializers.PrimaryKeyRelatedField(
+        source='category',
+        allow_null=True,
+        required=False,
+        queryset=Category.objects.all(),
+    )
+
     class Meta:
         model = Product
-        fields = '__all__' 
+        fields = [
+            'id',
+            'name',
+            'slug',
+            'price',
+            'description',
+            'category',
+            'category_id',
+            'image',
+            'created_at',
+            'updated_at',
+        ]
+
+
+class CartItemQuantitySerializer(serializers.Serializer):
+    cart_item_id = serializers.IntegerField()
+    quantity = serializers.IntegerField(min_value=1)
         
 
 class DetailedProductSerializer(serializers.ModelSerializer):
+    # Same shape as ProductSerializer: category name + its id, so the client can
+    # render `product.category` as text on both list and detail pages.
+    category = serializers.StringRelatedField()
+    category_id = serializers.IntegerField(read_only=True)
     similar_products = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['id', 'name','slug', 'price', 'description', 'category', 'image', 'similar_products']
+        fields = ['id', 'name', 'slug', 'price', 'description', 'category', 'category_id', 'image', 'similar_products']
 
     def get_similar_products(self, product):
         similar_products = Product.objects.filter(category=product.category).exclude(id=product.id)

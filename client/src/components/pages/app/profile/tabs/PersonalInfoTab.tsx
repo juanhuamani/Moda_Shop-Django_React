@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useUser } from "@/context/user-context";
 import { User as UserType } from "@/types/User";
-import { authAuthenticatedApi } from "@/axios/BaseAxios";
+import { api } from "@/axios/BaseAxios";
 import { toast } from "react-toastify";
 
 export function PersonalInfoTab() {
@@ -49,6 +49,30 @@ export function PersonalInfoTab() {
   );
 }
 
+/**
+ * Diferencias entre el formulario y el usuario actual, limitadas a los campos
+ * editables del formulario.
+ *
+ * Se comparan campo por campo a propósito: indexar `Partial<UserType>` con una
+ * clave `string` no es tipable sin `any`, y la lista explícita además impide
+ * enviar `id`, `avatar` o cualquier valor sin cambios.
+ */
+const getChangedProfileFields = (
+  data: UserType,
+  current: UserType
+): Partial<UserType> => {
+  const changed: Partial<UserType> = {};
+
+  if (data.first_name !== current.first_name) changed.first_name = data.first_name;
+  if (data.last_name !== current.last_name) changed.last_name = data.last_name;
+  if (data.email !== current.email) changed.email = data.email;
+  if (data.phone !== current.phone) changed.phone = data.phone;
+  if (data.location !== current.location) changed.location = data.location;
+  if (data.birthdate !== current.birthdate) changed.birthdate = data.birthdate;
+
+  return changed;
+};
+
 function ProfileInfoCard({
   user,
   isEditing,
@@ -71,18 +95,11 @@ function ProfileInfoCard({
   }, [user, reset]);
 
   const onSubmit = (data: UserType) => {
-    const updatedData: Partial<UserType> = {};
-
-    Object.keys(data).forEach((key) => {
-      if (data[key as keyof UserType] !== user[key as keyof UserType]) {
-        //@ts-expect-error Type 'string' cannot be used as an index type for partial user data
-        updatedData[key ] = data[key as keyof UserType];
-      }
-    });
+    const updatedData = getChangedProfileFields(data, user);
 
     if (Object.keys(updatedData).length > 0) {
-      authAuthenticatedApi
-        .put(`/profile/update`, updatedData)
+      api
+        .put(`/auth/profile/update`, updatedData)
       .then((response) => {
         uploadUser(response.data.user);
         toast.success('Informacion actualizada',{

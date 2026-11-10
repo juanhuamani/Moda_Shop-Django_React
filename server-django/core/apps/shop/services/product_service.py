@@ -1,6 +1,17 @@
 from django.shortcuts import get_object_or_404
+from rest_framework import serializers
 from ..models import Product, CartItem
 from ..serializers import ProductSerializer
+
+
+class ProductValidationError(serializers.ValidationError):
+    """Invalid product input.
+
+    Subclasses DRF's ValidationError so the view can let it propagate: DRF turns
+    it into a standard 400 body (``{"category_id": ["Invalid pk ..."]}``) instead
+    of the stringified ``ValueError`` representation this service used to raise.
+    """
+
 
 class ProductService:
 
@@ -22,14 +33,14 @@ class ProductService:
         if serializer.is_valid():
             product = serializer.save()
             return product
-        raise ValueError(serializer.errors)
+        raise ProductValidationError(serializer.errors)
 
     @staticmethod
     def update_product(product, data):
         serializer = ProductSerializer(product, data=data, partial=True)
         if serializer.is_valid():
             return serializer.save()
-        raise ValueError(serializer.errors)
+        raise ProductValidationError(serializer.errors)
 
     @staticmethod
     def delete_product(product):

@@ -1,8 +1,7 @@
-import { authApi } from "@/axios/BaseAxios";
+import { api } from "@/axios/BaseAxios";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Spinner } from "@/components/ui";
-import Cookies from 'js-cookie';
 import { useAuth } from "@/context/auth-context";
 
 export const LogoutRoute = () => {
@@ -10,32 +9,23 @@ export const LogoutRoute = () => {
   const { refreshAuth } = useAuth();
 
   useEffect(() => {
-    const token = Cookies.get("access_token");
-
     const logout = async () => {
       try {
-        await authApi.post("/logout", null, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        // Sin cabecera Authorization: el servidor limpia las cookies httpOnly
+        // aunque el access token ya haya expirado.
+        await api.post("/auth/logout");
       } catch (error) {
         console.error("Logout failed:", error);
       } finally {
-        Cookies.remove("access_token");
-        Cookies.remove("refresh_token");
+        localStorage.removeItem("user");
         await refreshAuth();
-        navigate("/login"); 
+        navigate("/login");
       }
     };
 
-    setTimeout(() => {
-      if (token) {
-        logout();
-      } else {
-        navigate("/login");
-      }
-    }, 3000);
+    const timer = setTimeout(logout, 3000);
+
+    return () => clearTimeout(timer);
   }, [navigate, refreshAuth]);
 
   return (

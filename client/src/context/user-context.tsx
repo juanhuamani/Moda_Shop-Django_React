@@ -6,9 +6,9 @@ import {
   useEffect
 } from 'react';
 
-import { authApi } from '@/axios/BaseAxios';
+import { api } from '@/axios/BaseAxios';
 import { User } from '@/types/User';
-import Cookies from 'js-cookie';
+import { useAuth } from '@/context/auth-context';
 
 type UserContextType = {
   user: User | null;
@@ -27,41 +27,53 @@ const UserContext = createContext<UserContextType>({
 });
 
 export function UserProvider({ children }: { children: ReactNode }) {
+  const { isAuthenticated } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setIsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
     const loadUser = async () => {
-      try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-          return;
+      // Cache solo para el primer pintado; la respuesta del servidor manda.
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser) as User);
+        } catch {
+          localStorage.removeItem('user');
         }
-        const token = Cookies.get('access_token');
-        const response = await authApi.get('/profile', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+      }
+
+      try {
+        const response = await api.get('/auth/profile');
         const userData: User = response.data.user;
-        if (userData) {
+        if (!cancelled && userData) {
           setUser(userData);
           localStorage.setItem('user', JSON.stringify(userData));
         }
       } catch (error) {
         console.error('Error loading user data:', error);
-
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     loadUser();
-  }, []);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated]);
 
   const login = (userData: User) => {
-    console.log('userData', userData);
     setUser(userData);
     localStorage.setItem('user', JSON.stringify(userData));
   };

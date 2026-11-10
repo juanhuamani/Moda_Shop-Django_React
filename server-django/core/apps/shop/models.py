@@ -1,5 +1,6 @@
 from apps.account.models import User
 from django.db import models
+from django.db.models import Q
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
@@ -76,6 +77,13 @@ class Cart(models.Model):
     class Meta:
         verbose_name = _('cart')
         verbose_name_plural = _('carts')
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user'],
+                condition=Q(paid=False),
+                name='unique_open_cart_per_user',
+            ),
+        ]
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='cart_items', verbose_name=_('cart'))

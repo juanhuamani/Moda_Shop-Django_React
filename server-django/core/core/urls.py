@@ -28,4 +28,7 @@ urlpatterns = [
 ]
 
 if settings.DEBUG:
+    # Local development only. In production the reverse proxy serves MEDIA_ROOT
+    # under /media/ (see docs/DEPLOY.md): a missing proxy block shows up as
+    # broken images, not as a Django error.
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

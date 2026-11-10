@@ -61,8 +61,8 @@ function useCombinedRefs<T>(...refs: Array<React.Ref<T> | null | undefined>) {
       if (typeof ref === 'function') {
         ref(targetRef.current)
       } else {
-        // @ts-ignore
-        ref.current = targetRef.current
+        const mutableRef = ref as { current: T | null }
+        mutableRef.current = targetRef.current
       }
     })
   }, [refs])

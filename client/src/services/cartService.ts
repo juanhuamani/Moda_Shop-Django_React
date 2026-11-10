@@ -1,9 +1,9 @@
-import { protectedApi } from '@/axios/BaseAxios'
+import { api } from '@/axios/BaseAxios'
 import { showSuccessToast, showErrorToast } from '@/utils/toast';
 
 export const addToCart = async (productId: number) => {
   try {
-    const response = await protectedApi.post(`/cartItem/`, {
+    const response = await api.post(`/api/cartItem/`, {
       product_id: productId
     });
     showSuccessToast('Producto agregado al carrito');
@@ -16,7 +16,7 @@ export const addToCart = async (productId: number) => {
 
 export const updateCartItem = async (cartItemId: number, quantity: number) => {
   try {
-    const response = await protectedApi.put(`/cartItem/`, {
+    const response = await api.put(`/api/cartItem/`, {
       cart_item_id: cartItemId,
       quantity: quantity
     });
@@ -30,7 +30,7 @@ export const updateCartItem = async (cartItemId: number, quantity: number) => {
 
 export const removeFromCart = async (itemId: number) => {
   try {
-    const response = await protectedApi.delete(`/cartItem/${itemId}/`);
+    const response = await api.delete(`/api/cartItem/${itemId}/`);
     return response.data;
   } catch (error) {
     console.error('Error al eliminar del carrito:', error);
@@ -40,7 +40,7 @@ export const removeFromCart = async (itemId: number) => {
 
 export const getCart = async () => {
   try {
-    const response = await protectedApi.get(`/cart`);
+    const response = await api.get(`/api/cart`);
     return response.data;
   } catch (error) {
     console.error('Error al obtener el carrito:', error);
@@ -50,7 +50,7 @@ export const getCart = async () => {
 
 export const clearCart = async () => {
   try {
-    const response = await protectedApi.delete(`/cart/clear/`);
+    const response = await api.delete(`/api/cart/clear/`);
     showSuccessToast('Carrito limpiado')
     return response.data;
   } catch (error) {

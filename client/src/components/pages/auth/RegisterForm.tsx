@@ -1,5 +1,6 @@
 import { Button, Checkbox, Input, Label } from "@/components/ui";
-import { authApi } from "@/axios/BaseAxios";
+import { api } from "@/axios/BaseAxios";
+import { AxiosError } from "axios";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -19,6 +20,34 @@ interface Inputs {
   terms: boolean;
   username: string;
 }
+
+const KNOWN_ERROR_FIELDS = [
+  "username",
+  "email",
+  "first_name",
+  "last_name",
+  "password",
+  "password2",
+] as const;
+
+type KnownErrorField = (typeof KNOWN_ERROR_FIELDS)[number];
+
+const isKnownErrorField = (key: string): key is KnownErrorField =>
+  (KNOWN_ERROR_FIELDS as readonly string[]).includes(key);
+
+const GENERIC_REGISTER_ERROR =
+  "No se pudo completar el registro. Revisa los datos e inténtalo de nuevo.";
+
+/** DRF responde `{campo: ["mensaje"]}`; nunca `{errors: {campo: {message}}}`. */
+const formatErrorMessage = (value: unknown): string => {
+  if (Array.isArray(value)) {
+    return value.map((message) => String(message)).join(" ");
+  }
+  if (typeof value === "string") {
+    return value;
+  }
+  return "";
+};
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -44,6 +73,43 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   });
   const { t } = useTranslation('auth');
   const password = watch("password");
+
+  const applyServerErrors = (error: unknown) => {
+    const response = (
+      error as AxiosError<Record<string, unknown>>
+    ).response;
+
+    if (!response || response.status !== 400 || !response.data) {
+      setError("root", { type: "manual", message: GENERIC_REGISTER_ERROR });
+      return;
+    }
+
+    let formMessage = "";
+    const unknownFields: string[] = [];
+
+    for (const [key, value] of Object.entries(response.data)) {
+      const message = formatErrorMessage(value);
+      if (!message) continue;
+
+      if (key === "non_field_errors") {
+        formMessage = message;
+        continue;
+      }
+      if (isKnownErrorField(key)) {
+        setError(key, { type: "manual", message });
+        continue;
+      }
+      unknownFields.push(key);
+    }
+
+    if (!formMessage && unknownFields.length > 0) {
+      formMessage = GENERIC_REGISTER_ERROR;
+    }
+    if (formMessage) {
+      setError("root", { type: "manual", message: formMessage });
+    }
+  };
+
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     if (!data.terms) {
       setError("terms", {
@@ -52,24 +118,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       });
       return;
     }
-    authApi
-      .post("/register", data)
+    api
+      .post("/auth/register", data)
       .then((response) => {
         console.log(response.data);
         onSuccess();
       })
       .catch((error) => {
         console.error(error);
-        if (error.response.data?.errors) {
-          const { errors } = error.response.data;
-          for (const key in errors) {
-            const errorMessage = errors[key].message;
-            setError(errors[key].field, {
-              type: "manual",
-              message: errorMessage,
-            });
-          }
-        }
+        applyServerErrors(error);
       });
   };
 
@@ -247,6 +304,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
         </div>
         {errors.terms && (
           <p className="text-sm text-red-600">{errors.terms.message}</p>
+        )}
+        {errors.root?.message && (
+          <p className="text-sm text-red-600">{errors.root.message}</p>
         )}
         <Button className="w-full bg-tertiary text-[hsl(220,47%,10%)] hover:bg-[hsl(215,100%,85%)]">
           {t('register.signUp')}

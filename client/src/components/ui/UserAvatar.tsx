@@ -1,5 +1,6 @@
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/Avatar";
 import { useUser } from "@/context/user-context";
+import { resolveMediaUrl } from "@/config/env";
 import { cn } from "@/utils/cn";
 
 export const UserAvatar = ({
@@ -8,10 +9,8 @@ export const UserAvatar = ({
   size?: "xs" | "sm" | "md" | "lg" | "xl";
 }) => {
   const { user } = useUser();
-  const avatarUrl = user?.avatar?.startsWith("http")
-    ? user.avatar
-    : `${import.meta.env.VITE_API_URL}/${user?.avatar}`
-    
+  const avatarUrl = resolveMediaUrl(user?.avatar) ?? undefined
+
   return (
     <Avatar className={cn(
       "h-12 w-12",

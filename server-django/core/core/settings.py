@@ -15,6 +15,8 @@ from datetime import timedelta
 import environ
 import os
 
+from django.core.exceptions import ImproperlyConfigured
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,12 +28,35 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+try:
+    SECRET_KEY = env('SECRET_KEY')
+except ImproperlyConfigured as exc:
+    raise ImproperlyConfigured(
+        'SECRET_KEY is not set. Copy server-django/core/.env.example to '
+        'server-django/core/.env and set SECRET_KEY (the file contains the '
+        'one-line command that generates a new one).'
+    ) from exc
+if not SECRET_KEY:
+    # environ returns '' for a key that is present but empty.
+    raise ImproperlyConfigured(
+        'SECRET_KEY is empty. Copy server-django/core/.env.example to '
+        'server-django/core/.env and set SECRET_KEY (the file contains the '
+        'one-line command that generates a new one).'
+    )
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+if not ALLOWED_HOSTS:
+    if DEBUG:
+        ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+    else:
+        raise ImproperlyConfigured(
+            'ALLOWED_HOSTS is empty while DEBUG=0. Set ALLOWED_HOSTS in '
+            'server-django/core/.env to the host names this deployment serves '
+            '(see server-django/core/.env.example).'
+        )
 
 
 
@@ -53,8 +78,13 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # CorsMiddleware must stay first (django-cors-headers requirement).
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
+    # WhiteNoise serves collected static files from the WSGI app in production.
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # Cookie-authenticated unsafe requests must carry a trusted Origin/Referer.
+    'core.middleware.OriginGuardMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -102,6 +132,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': env.int('DATABASE_TIMEOUT', default=20),
+        },
     }
 }
 
@@ -141,12 +174,23 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Only list directories that exist, otherwise Django raises staticfiles.W004.
+STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').is_dir() else []
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
+    },
+}
 
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Empty MEDIA_ROOT in .env must not collapse to the working directory.
+MEDIA_ROOT = Path(env('MEDIA_ROOT', default='') or BASE_DIR / 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -154,9 +198,26 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
+    # Only cookie authentication: no token is ever accepted from a header.
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+        'core.authentication.CookieJWTAuthentication',
+    ),
+    # Opt-out by declaring AllowAny on the five auth endpoints.
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    # ScopedRateThrottle is required for the login/register throttle_scope rules.
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ),
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '30/min',
+        'user': '1000/day',
+        'login': '10/min',
+        'register': '5/hour',
+    },
 }
 
 SIMPLE_JWT = {
@@ -170,3 +231,16 @@ SIMPLE_JWT = {
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
+
+# Reverse-proxy / TLS awareness: in production one origin (proxy) serves the SPA
+# and forwards /api, /auth, /media, /static, /admin to this WSGI app.
+USE_X_FORWARDED_HOST = env.bool('USE_X_FORWARDED_HOST', default=False)
+if env.bool('USE_X_FORWARDED_PROTO', default=False):
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Cookie flags: secure by default when DEBUG is off (https), plain on localhost.
+CSRF_COOKIE_SECURE = env.bool('CSRF_COOKIE_SECURE', default=not DEBUG)
+# Consumed by the auth cookie helpers (see apps/account/views.py).
+JWT_COOKIE_SECURE = env.bool('JWT_COOKIE_SECURE', default=not DEBUG)
+JWT_COOKIE_SAMESITE = env('JWT_COOKIE_SAMESITE', default='Lax')

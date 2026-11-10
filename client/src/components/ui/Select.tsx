@@ -18,10 +18,22 @@ export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectE
 }
 
 const Select = React.forwardRef<HTMLDivElement, SelectProps>(
-  ({ className, options, value, onChange, placeholder, variant = "default", disabled, ...props },_ref) => {
+  ({ className, options, value, onChange, placeholder, variant = "default", disabled, ...props }, ref) => {
     const [open, setOpen] = React.useState(false)
     const [selectedValue, setSelectedValue] = React.useState(value || "")
     const selectRef = React.useRef<HTMLDivElement>(null)
+
+    const assignRootRef = React.useCallback(
+      (node: HTMLDivElement | null) => {
+        selectRef.current = node
+        if (typeof ref === "function") {
+          ref(node)
+        } else if (ref) {
+          ref.current = node
+        }
+      },
+      [ref]
+    )
 
     // Close dropdown when clicking outside
     React.useEffect(() => {
@@ -56,7 +68,7 @@ const Select = React.forwardRef<HTMLDivElement, SelectProps>(
 
     return (
       <div 
-        ref={selectRef} 
+        ref={assignRootRef} 
         className={cn("relative", className)}
       >
         <div

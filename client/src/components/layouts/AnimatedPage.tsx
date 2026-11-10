@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, Transition, Variants } from "framer-motion";
 import { ReactNode, useEffect, useState } from "react";
 
 interface AnimatedPageProps {
@@ -9,33 +9,37 @@ interface AnimatedPageProps {
   duration?: number;
 }
 
-const variants = {
+type SlideDirection = "up" | "down" | "left" | "right";
+type SimpleVariant = "fade" | "zoom" | "flip" | "rotate" | "bounce";
+
+const slideVariants: Record<SlideDirection, Variants> = {
+  up: {
+    initial: { opacity: 0, y: 50 },
+    in: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -50 },
+  },
+  down: {
+    initial: { opacity: 0, y: -50 },
+    in: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: 50 },
+  },
+  left: {
+    initial: { opacity: 0, x: 50 },
+    in: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: -50 },
+  },
+  right: {
+    initial: { opacity: 0, x: -50 },
+    in: { opacity: 1, x: 0 },
+    exit: { opacity: 0, x: 50 },
+  },
+};
+
+const variants: Record<SimpleVariant, Variants> = {
   fade: {
     initial: { opacity: 0 },
     in: { opacity: 1 },
     exit: { opacity: 0 },
-  },
-  slide: {
-    up: {
-      initial: { opacity: 0, y: 50 },
-      in: { opacity: 1, y: 0 },
-      exit: { opacity: 0, y: -50 },
-    },
-    down: {
-      initial: { opacity: 0, y: -50 },
-      in: { opacity: 1, y: 0 },
-      exit: { opacity: 0, y: 50 },
-    },
-    left: {
-      initial: { opacity: 0, x: 50 },
-      in: { opacity: 1, x: 0 },
-      exit: { opacity: 0, x: -50 },
-    },
-    right: {
-      initial: { opacity: 0, x: -50 },
-      in: { opacity: 1, x: 0 },
-      exit: { opacity: 0, x: 50 },
-    },
   },
   zoom: {
     initial: { opacity: 0, scale: 0.8 },
@@ -59,13 +63,42 @@ const variants = {
   },
 };
 
-const transitions = {
+type TransitionKey = "default" | "smooth" | "bounce" | "elastic" | "slow";
+
+const transitions: Record<TransitionKey, Transition> = {
   default: { duration: 0.5 },
   smooth: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
   bounce: { type: "spring", stiffness: 300, damping: 20 },
   elastic: { type: "spring", stiffness: 400, damping: 15 },
   slow: { duration: 1, ease: "easeInOut" },
 };
+
+const variantOptions: readonly ("slide" | SimpleVariant)[] = [
+  "fade",
+  "slide",
+  "zoom",
+  "flip",
+  "rotate",
+  "bounce",
+];
+
+const slideDirectionOptions: readonly SlideDirection[] = [
+  "up",
+  "down",
+  "left",
+  "right",
+];
+
+const transitionOptions: readonly TransitionKey[] = [
+  "default",
+  "smooth",
+  "bounce",
+  "elastic",
+  "slow",
+];
+
+const pickRandom = <T,>(options: readonly T[]): T =>
+  options[Math.floor(Math.random() * options.length)];
 
 export const AnimatedPage = ({ 
   children, 
@@ -74,27 +107,23 @@ export const AnimatedPage = ({
   direction = "right",
   duration = 0.5
 }: AnimatedPageProps) => {
-  const [currentVariant, setCurrentVariant] = useState<any>(null);
-  const [currentTransition, setCurrentTransition] = useState<any>(null);
+  const [currentVariant, setCurrentVariant] = useState<Variants | null>(null);
+  const [currentTransition, setCurrentTransition] = useState<Transition | null>(null);
 
   useEffect(() => {
     if (variant === "random") {
-      const options = ["fade", "slide", "zoom", "flip", "rotate", "bounce"];
-      const randomVariant = options[Math.floor(Math.random() * options.length)];
+      const randomVariant = pickRandom(variantOptions);
       
       if (randomVariant === "slide") {
-        const directions = ["up", "down", "left", "right"];
-        const randomDirection = directions[Math.floor(Math.random() * directions.length)];
-        setCurrentVariant(variants.slide[randomDirection]);
+        setCurrentVariant(slideVariants[pickRandom(slideDirectionOptions)]);
       } else {
         setCurrentVariant(variants[randomVariant]);
       }
       
-      const transitionOptions = ["default", "smooth", "bounce", "elastic", "slow"];
-      const randomTransition = transitionOptions[Math.floor(Math.random() * transitionOptions.length)];
+      const randomTransition = pickRandom(transitionOptions);
       setCurrentTransition({...transitions[randomTransition], duration});
     } else if (variant === "slide") {
-      setCurrentVariant(variants.slide[direction]);
+      setCurrentVariant(slideVariants[direction]);
       setCurrentTransition({...transitions.smooth, duration});
     } else {
       setCurrentVariant(variants[variant]);

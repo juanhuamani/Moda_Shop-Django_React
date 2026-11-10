@@ -3,7 +3,7 @@ import { Button, Input, Label, Switch, Badge } from "@/components/ui"
 import { Lock } from "lucide-react"
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { authAuthenticatedApi } from "@/axios/BaseAxios";
+import { api } from "@/axios/BaseAxios";
 import { showSuccessToast, showErrorToast } from '@/utils/toast';
 
 export function SecurityTab() {
@@ -28,7 +28,7 @@ function PasswordCard() {
 
   const onSubmit = (data: { password: string; newPassword: string; confirmPassword: string }) => {
     setIsloading(true);
-    authAuthenticatedApi.put("/password/change", data)
+    api.put("/auth/password/change", data)
       .then(() => {
         showSuccessToast("Contraseña actualizada");
         reset();

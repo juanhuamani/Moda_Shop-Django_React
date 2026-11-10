@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { ShoppingCart, Trash2, ArrowLeft, CreditCard } from 'lucide-react'
-import { Button, Input } from "@/components/ui"
+import { Button } from "@/components/ui"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/Card"
 
 import { CartItemList } from "@/components/pages/app/cart/CartItemList"
@@ -18,13 +18,9 @@ export function CartPage() {
   const [items, setItems] = useState<CartItem[]>([])
   const [originalItems, setOriginalItems] = useState<CartItem[]>([])
   const [updatingItems, setUpdatingItems] = useState<number[]>([])
-  const [couponCode, setCouponCode] = useState("")
-  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isClearing, setIsClearing] = useState(false) 
-  const [discount, setDiscount] = useState<number>(0)
   const [subtotal, setSubtotal] = useState<number>(0)
-  const [total, setTotal] = useState<number>(0)
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -34,7 +30,6 @@ export function CartPage() {
         setItems(data.cart.items)
         setOriginalItems(data.cart.items)
         setSubtotal(data.cart.sum_total)
-        setTotal(data.cart.sum_total - discount)
       } catch (error) {
         console.error("Error al obtener el carrito:", error)
       } finally {
@@ -73,7 +68,6 @@ export function CartPage() {
         )
       )
       setSubtotal(response.cart.sum_total)
-      setTotal(response.cart.sum_total - discount)
     } catch (error) {
       console.error("Error al actualizar el carrito:", error)
     } finally {
@@ -86,7 +80,6 @@ export function CartPage() {
       setUpdatingItems(prev => [...prev, id])
       const response = await removeFromCart(id)
       setSubtotal(response.cart.sum_total)
-      setTotal(response.cart.sum_total - discount)
       setItems(prevItems => prevItems.filter(item => item.id !== id))
       setOriginalItems(prevItems => prevItems.filter(item => item.id !== id))
     } catch (error) {
@@ -102,26 +95,12 @@ export function CartPage() {
       await clearCart()
       setItems([])
       setOriginalItems([])
-      setCouponCode("")
-      setDiscount(0)
       setSubtotal(0)
-      setTotal(0)
     } catch (error) {
       console.error("Error al vaciar el carrito:", error) 
     } finally {
       setIsClearing(false)
     }
-  }
-
-  const handleApplyCoupon = () => {
-    if (!couponCode) return
-    setIsApplyingCoupon(true)
-    
-    setTimeout(() => {
-      setIsApplyingCoupon(false)
-      setDiscount(10)
-      alert(`Cupón "${couponCode}" aplicado con éxito`)
-    }, 1000)
   }
 
   if (isLoading) {
@@ -172,24 +151,7 @@ export function CartPage() {
                     onUpdateItem={handleUpdateItem}
                   />
                 </CardContent>
-                <CardFooter className="flex flex-col border-t border-[hsl(224,34%,30%)] p-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="mb-4 flex w-full flex-col gap-2 sm:mb-0 sm:max-w-xs">
-                    <div className="flex">
-                      <Input
-                        placeholder="Código de descuento"
-                        value={couponCode}
-                        onChange={(e) => setCouponCode(e.target.value)}
-                        className="rounded-r-none"
-                      />
-                      <Button
-                        onClick={handleApplyCoupon}
-                        disabled={!couponCode || isApplyingCoupon}
-                        className="rounded-l-none"
-                      >
-                        {isApplyingCoupon ? "Aplicando..." : "Aplicar"}
-                      </Button>
-                    </div>
-                  </div>
+                <CardFooter className="flex flex-col border-t border-[hsl(224,34%,30%)] p-4 sm:flex-row sm:items-center sm:justify-end">
                   <Button variant="outline" onClick={handleClearCart} disabled={isClearing} isLoading={isClearing }>
                     <Trash2 className="mr-2 h-4 w-4" />
                     Vaciar carrito
@@ -201,8 +163,8 @@ export function CartPage() {
             <div>
               <OrderSummary
                 subtotal={subtotal}
-                discount={discount}
-                total={total}
+                discount={0}
+                total={subtotal}
                 isUpdating={updatingItems.length > 0}
               />
 

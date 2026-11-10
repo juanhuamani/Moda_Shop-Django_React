@@ -40,10 +40,18 @@ export function Tooltip({
   }, [])
 
   // Clone the child element to add data attributes
-  const childElement = React.cloneElement(children, {
+  const tooltipDataProps: {
+    "data-tooltip-id": string;
+    "data-tooltip-content"?: string;
+  } = {
     "data-tooltip-id": tooltipId,
     "data-tooltip-content": typeof content === "string" ? content : undefined,
-  })
+  }
+
+  const childElement = React.cloneElement(
+    children as React.ReactElement<typeof tooltipDataProps>,
+    tooltipDataProps
+  )
 
   // Don't render tooltip on server
   if (!isMounted) return childElement

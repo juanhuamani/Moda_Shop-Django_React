@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Spinner } from "./Spinner";
 import { cn } from "@/utils/cn";
 import FallbackImg from "@/assets/fallback/fallback.jpg";
+import { resolveMediaUrl } from "@/config/env";
 
 interface ImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
@@ -15,12 +16,13 @@ export const Image = ({
   className = "",
   ...props
 }: ImageProps) => {
-  const baseUrl: string = import.meta.env.VITE_API_URL as string;
   const [isLoading, setIsLoading] = useState(true);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!src) {
+    const resolvedSrc = resolveMediaUrl(src);
+
+    if (!resolvedSrc) {
       setImageSrc(FallbackImg);
       setIsLoading(false);
       return;
@@ -29,8 +31,7 @@ export const Image = ({
     const img = new window.Image();
 
     img.onload = () => {
-      const finalSrc = src.includes("https://") ? src : baseUrl + src;
-      setImageSrc(finalSrc);
+      setImageSrc(resolvedSrc);
       setIsLoading(false);
     };
 
@@ -39,8 +40,8 @@ export const Image = ({
       setIsLoading(false);
     };
 
-    img.src = src.includes("https://") ? src : baseUrl + src;
-  }, [src, baseUrl]);
+    img.src = resolvedSrc;
+  }, [src]);
 
   return (
     <div className="relative w-full h-full">

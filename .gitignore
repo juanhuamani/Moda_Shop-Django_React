@@ -1,0 +1,13 @@
+# Rosetta
+agents/TEMP/
+refsrc/
+!refsrc/INDEX.md
+
+# Python virtualenvs (never stage a venv)
+venv/
+server-django/core/venv/
+
+plans/
+docs/
+.opencode/
+agents/

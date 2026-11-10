@@ -3,7 +3,7 @@ import { Button, Checkbox, Input, Label } from "@/components/ui";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { useForm, SubmitHandler } from "react-hook-form"
-import { authApi } from "@/axios/BaseAxios";
+import { api } from "@/axios/BaseAxios";
 import { useUser } from "@/context/user-context";
 import { useAuth } from "@/context/auth-context";
 
@@ -29,7 +29,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess }) => {
 
   const onSubmit: SubmitHandler<Inputs> = (data) => {
     console.log(data);
-    authApi.post("/login", data)
+    api.post("/auth/login", data)
       .then((response) => {
         console.log(response.data);
         const { user } = response.data;

@@ -1,3 +1,4 @@
+from django.db import IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from ..models import Cart, CartItem, Product
 
@@ -5,11 +6,13 @@ class CartService:
 
     @staticmethod
     def get_or_create_cart(user):
-        return Cart.objects.get_or_create(user=user, paid=False)
-
-    @staticmethod
-    def get_cart(user):
-        return get_object_or_404(Cart, user=user, paid=False)
+        """The only cart accessor: always returns an open cart for ``user``."""
+        try:
+            with transaction.atomic():
+                return Cart.objects.get_or_create(user=user, paid=False)
+        except IntegrityError:
+            # Lost the race against unique_open_cart_per_user: re-fetch once.
+            return Cart.objects.get(user=user, paid=False), False
 
     @staticmethod
     def get_product(product_id):
@@ -37,5 +40,10 @@ class CartService:
 
     @staticmethod
     def clear_cart(user):
-        cart = get_object_or_404(Cart, user=user, paid=False)
+        """Idempotent: no cart and no items is a success, not a 404."""
+        cart = Cart.objects.filter(user=user, paid=False).first()
+        if cart is None:
+            return
+
+        cart.cart_items.all().delete()
         cart.delete()

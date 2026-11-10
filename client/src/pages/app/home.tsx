@@ -10,7 +10,7 @@ import { TrendingProducts } from "@/components/pages/app/home/TrendingProducts";
 import { useEffect, useState } from "react";
 import { Category } from "@/types/Categories";
 import { Product } from "@/types/Product";
-import { protectedApi } from "@/axios/BaseAxios";
+import { api } from "@/axios/BaseAxios";
 
 import { AnimatedPage } from "@/components/layouts/AnimatedPage";
 
@@ -24,9 +24,9 @@ export function HomePage() {
     const fetchData = async () => {
       try {
         const [categoriesRes, featuredRes, popularRes] = await Promise.all([
-          protectedApi.get("/categories"),
-          protectedApi.get("/products/featured"),
-          protectedApi.get("/products/popular"),
+          api.get("/api/categories"),
+          api.get("/api/products/featured"),
+          api.get("/api/products/popular"),
         ]);
   
         const { categories } = categoriesRes.data;

@@ -21,7 +21,7 @@ import { useUser } from "@/context/user-context";
 import { useNavigate } from "react-router-dom";
 import { User as UserType } from "@/types/User";
 import { JSX, useRef, useState } from "react";
-import { protectedApi } from "@/axios/BaseAxios";
+import { api } from "@/axios/BaseAxios";
 
 export function ProfileSidebar() {
   const { user, uploadUser } = useUser();
@@ -74,14 +74,11 @@ function ProfileCard({
       const formData = new FormData();
       formData.append("avatar", file);
 
-      const { data } = await protectedApi.put("/user/avatar", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      // Sin cabecera Content-Type manual: el navegador debe fijar
+      // `multipart/form-data; boundary=...` o DRF recibe un cuerpo vacio.
+      const { data } = await api.put("/auth/profile/avatar", formData);
 
-      const updatedUser = { ...user, avatar: data.avatar };
-      uploadUser(updatedUser);
+      uploadUser(data.user);
     } catch (error) {
       console.error("Error al actualizar el avatar:", error);
     } finally {

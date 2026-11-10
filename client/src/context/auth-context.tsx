@@ -1,5 +1,12 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { checkAuthCookie } from "@/utils/auth";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import { bootstrapAuth } from "@/utils/auth";
 import LoadingPage from "@/components/common/LoadingPage";
 
 type AuthContextType = {
@@ -12,16 +19,15 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-  const refreshAuth = async () => {
+  const refreshAuth = useCallback(async () => {
     setIsAuthenticated(null);
-    const valid = await checkAuthCookie();
-    console.log("Valid:", valid);
+    const valid = await bootstrapAuth();
     setIsAuthenticated(valid);
-  };
+  }, []);
 
   useEffect(() => {
     refreshAuth();
-  }, []);
+  }, [refreshAuth]);
 
   if (isAuthenticated === null) {
    return  <LoadingPage message="Verificando autenticación..." />; 

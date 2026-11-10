@@ -87,4 +87,13 @@ local_settings.py
 
 .env
 db.sqlite3
-media/
+
+# Uploaded media stays out of the repository, except the built-in default
+# avatar (a locally generated placeholder, see media/avatars/default.jpg).
+media/*
+!media/avatars/
+media/avatars/*
+!media/avatars/default.jpg
+
+# collectstatic output (whitenoise reads it in production, it is generated)
+staticfiles/
