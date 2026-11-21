@@ -3,8 +3,8 @@ import { Link, useParams } from "react-router-dom"
 import { AxiosError } from "axios"
 import { Minus, Plus, ShoppingBag } from "lucide-react"
 
-import { Button, Card, Image } from "@/components/ui"
-import { CardContent } from "@/components/ui/Card"
+import { Button, Image } from "@/components/ui"
+import { ProductCard } from "@/components/common/ProductCard"
 import { PageHeader } from "@/components/PageHeader"
 import { AnimatedPage } from "@/components/layouts/AnimatedPage"
 import LoadingPage from "@/components/common/LoadingPage"
@@ -12,23 +12,13 @@ import { api } from "@/axios/BaseAxios"
 import { addToCart, updateCartItem } from "@/services/cartService"
 import { paths } from "@/config/paths"
 import { Product } from "@/types/Product"
+import { formatPrice } from "@/utils/formatPrice"
 
 interface ProductDetail extends Product {
   similar_products?: Product[]
 }
 
 type PageStatus = "loading" | "ready" | "not-found" | "error"
-
-const formatPrice = (price: string | number): string => {
-  const numeric = typeof price === "number" ? price : Number.parseFloat(price)
-  if (Number.isNaN(numeric)) {
-    return String(price)
-  }
-  return new Intl.NumberFormat("es-ES", {
-    style: "currency",
-    currency: "EUR",
-  }).format(numeric)
-}
 
 export function ProductDetailRoute() {
   const { productSlug } = useParams<{ productSlug: string }>()
@@ -107,14 +97,16 @@ export function ProductDetailRoute() {
           ]}
         />
         <div className="flex flex-col items-start gap-4">
-          <h1 className="text-2xl font-bold text-[hsl(215,100%,92%)]">
+          <h1 className="text-heading font-bold text-foreground">
             Producto no encontrado
           </h1>
-          <p className="text-tertiary">
+          <p className="text-muted-foreground">
             El producto que buscas no existe o ya no está disponible.
           </p>
           <Link to={paths.app.products.getHref()}>
-            <Button variant="outline">Volver a productos</Button>
+            <Button variant="outline" className="rounded-control">
+              Volver a productos
+            </Button>
           </Link>
         </div>
       </div>
@@ -132,8 +124,8 @@ export function ProductDetailRoute() {
           ]}
         />
         <div className="flex flex-col items-start gap-4">
-          <p className="text-tertiary">No se pudo cargar el producto.</p>
-          <Button variant="outline" onClick={fetchProduct}>
+          <p className="text-muted-foreground">No se pudo cargar el producto.</p>
+          <Button variant="outline" className="rounded-control" onClick={fetchProduct}>
             Reintentar
           </Button>
         </div>
@@ -153,43 +145,41 @@ export function ProductDetailRoute() {
         />
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-          <div className="relative aspect-square overflow-hidden rounded-lg border border-[hsl(224,34%,30%)] bg-[hsl(224,34%,25%)]">
+          <div className="relative aspect-square overflow-hidden rounded-card border border-border bg-surface-raised shadow-card">
             <Image
-              src={product.image || ""}
+              src={product.image}
               alt={product.name}
-              className="object-contain object-center w-full h-full p-4"
+              className="h-full w-full rounded-card object-contain object-center p-4"
             />
           </div>
 
           <div>
             {product.category && (
-              <p className="mb-2 text-sm uppercase tracking-wide text-[hsl(215,100%,92%)/70]">
+              <p className="mb-2 text-sm uppercase tracking-wide text-muted-foreground">
                 {product.category}
               </p>
             )}
-            <h1 className="mb-4 text-3xl font-bold text-[hsl(215,100%,92%)]">
+            <h1 className="mb-4 text-heading font-bold text-foreground">
               {product.name}
             </h1>
             <div className="mb-6 flex items-center gap-2">
-              <span className="text-3xl font-bold text-[hsl(215,100%,92%)]">
+              <span className="text-heading font-bold text-foreground">
                 {formatPrice(product.price)}
               </span>
             </div>
 
             {product.description && (
-              <p className="mb-6 whitespace-pre-line text-[hsl(215,100%,92%)/80]">
+              <p className="mb-6 whitespace-pre-line text-muted-foreground">
                 {product.description}
               </p>
             )}
 
             <div className="mb-6">
-              <h3 className="mb-2 font-medium text-[hsl(215,100%,92%)]">
-                Cantidad
-              </h3>
-              <div className="flex w-32 items-center rounded-md border border-[hsl(224,34%,30%)]">
+              <h3 className="mb-2 font-medium text-foreground">Cantidad</h3>
+              <div className="flex w-32 items-center rounded-control border border-border bg-surface">
                 <button
                   type="button"
-                  className="flex h-10 w-10 items-center justify-center border-r border-[hsl(224,34%,30%)] text-[hsl(215,100%,92%)/70] hover:bg-[hsl(224,34%,25%)] hover:text-[hsl(215,100%,92%)]"
+                  className="flex h-10 w-10 items-center justify-center rounded-l-control border-r border-border text-muted-foreground transition-colors hover:bg-surface-raised hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   onClick={() => handleQuantityChange(quantity - 1)}
                   disabled={quantity <= 1}
                   aria-label="Disminuir cantidad"
@@ -203,11 +193,12 @@ export function ProductDetailRoute() {
                   onChange={(e) =>
                     handleQuantityChange(Number.parseInt(e.target.value) || 1)
                   }
-                  className="w-12 border-none bg-transparent p-0 text-center text-[hsl(215,100%,92%)] focus:outline-none focus:ring-0"
+                  className="w-12 border-none bg-transparent p-0 text-center text-foreground focus:outline-none focus:ring-0"
+                  aria-label="Cantidad"
                 />
                 <button
                   type="button"
-                  className="flex h-10 w-10 items-center justify-center border-l border-[hsl(224,34%,30%)] text-[hsl(215,100%,92%)/70] hover:bg-[hsl(224,34%,25%)] hover:text-[hsl(215,100%,92%)]"
+                  className="flex h-10 w-10 items-center justify-center rounded-r-control border-l border-border text-muted-foreground transition-colors hover:bg-surface-raised hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   onClick={() => handleQuantityChange(quantity + 1)}
                   aria-label="Aumentar cantidad"
                 >
@@ -217,7 +208,7 @@ export function ProductDetailRoute() {
             </div>
 
             <Button
-              className="w-full sm:w-auto"
+              className="w-full rounded-control sm:w-auto"
               onClick={handleAddToCart}
               isLoading={isAdding}
             >
@@ -229,35 +220,15 @@ export function ProductDetailRoute() {
 
         {similarProducts.length > 0 && (
           <div className="mt-12">
-            <h2 className="mb-6 text-2xl font-bold text-[hsl(215,100%,92%)]">
+            <h2 className="mb-6 text-heading font-bold text-foreground">
               Productos relacionados
             </h2>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {similarProducts.map((similarProduct) => (
-                <Card
+                <ProductCard
                   key={similarProduct.id}
-                  className="overflow-hidden border-[hsl(224,34%,30%)]"
-                >
-                  <Link
-                    to={paths.app.products.details.getHref(similarProduct.slug)}
-                  >
-                    <div className="relative aspect-square overflow-hidden bg-[hsl(224,34%,25%)]">
-                      <Image
-                        src={similarProduct.image || ""}
-                        alt={similarProduct.name}
-                        className="object-cover object-center w-full h-full transition-transform duration-300 hover:scale-105"
-                      />
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="mb-1 font-medium text-[hsl(215,100%,92%)]">
-                        {similarProduct.name}
-                      </h3>
-                      <span className="font-bold text-[hsl(215,100%,92%)]">
-                        {formatPrice(similarProduct.price)}
-                      </span>
-                    </CardContent>
-                  </Link>
-                </Card>
+                  product={similarProduct}
+                />
               ))}
             </div>
           </div>

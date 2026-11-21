@@ -10,16 +10,16 @@ export function ProfileContent() {
   return (
     <Tabs defaultValue="personal" className="space-y-6">
       <TabsList className="w-full justify-start bg-secondary-light text-tertiary">
-        <TabsTrigger value="personal" className="data-[state=active]:bg-primary data-[state=active]:text-tertiary">
+        <TabsTrigger value="personal" className="data-[state=active]:bg-surface-raised data-[state=active]:text-foreground data-[state=active]:shadow-card">
           Información personal
         </TabsTrigger>
-        <TabsTrigger value="security" className="data-[state=active]:bg-primary data-[state=active]:text-tertiary">
+        <TabsTrigger value="security" className="data-[state=active]:bg-surface-raised data-[state=active]:text-foreground data-[state=active]:shadow-card">
           Seguridad
         </TabsTrigger>
-        <TabsTrigger value="notifications" className="data-[state=active]:bg-primary data-[state=active]:text-tertiary">
+        <TabsTrigger value="notifications" className="data-[state=active]:bg-surface-raised data-[state=active]:text-foreground data-[state=active]:shadow-card">
           Notificaciones
         </TabsTrigger>
-        <TabsTrigger value="billing" className="data-[state=active]:bg-primary data-[state=active]:text-tertiary">
+        <TabsTrigger value="billing" className="data-[state=active]:bg-surface-raised data-[state=active]:text-foreground data-[state=active]:shadow-card">
           Facturación
         </TabsTrigger>
       </TabsList>

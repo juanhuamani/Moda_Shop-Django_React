@@ -43,6 +43,20 @@ export const createAppRouter = () =>
               return { Component: LoginRoute };
             },
           },
+          {
+            path: paths.auth.forgotPassword.path,
+            lazy: async () => {
+              const { ForgotPasswordRoute } = await import("@/pages/auth/forgot-password");
+              return { Component: ForgotPasswordRoute };
+            },
+          },
+          {
+            path: paths.auth.passwordReset.path,
+            lazy: async () => {
+              const { PasswordResetRoute } = await import("@/pages/auth/password-reset");
+              return { Component: PasswordResetRoute };
+            },
+          },
         ],
       },
       {
@@ -107,8 +121,43 @@ export const createAppRouter = () =>
               const { ProfileRoute } = await import("@/pages/app/profile");
               return {
                 Component: ProfileRoute,
-              };
+              }
             }
+          },
+          {
+            path: paths.app.categories.path,
+            lazy: async () => {
+              const { CategoriesRoute } = await import("@/pages/app/categories");
+              return { Component: CategoriesRoute };
+            },
+          },
+          {
+            path: paths.app.customers.path,
+            lazy: async () => {
+              const { CustomersRoute } = await import("@/pages/app/customers");
+              return { Component: CustomersRoute };
+            },
+          },
+          {
+            path: paths.app.discounts.path,
+            lazy: async () => {
+              const { DiscountsRoute } = await import("@/pages/app/discounts");
+              return { Component: DiscountsRoute };
+            },
+          },
+          {
+            path: paths.app.settings.path,
+            lazy: async () => {
+              const { SettingsRoute } = await import("@/pages/app/settings");
+              return { Component: SettingsRoute };
+            },
+          },
+          {
+            path: paths.app.help.path,
+            lazy: async () => {
+              const { HelpRoute } = await import("@/pages/app/help");
+              return { Component: HelpRoute };
+            },
           }
         ],
       },

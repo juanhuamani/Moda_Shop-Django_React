@@ -3,10 +3,10 @@ import { Button, Label, Checkbox } from "@/components/ui"
 
 export function NotificationsTab() {
   return (
-    <Card className="bg-secondary-light border-secondary">
+    <Card className="bg-surface border-card-border">
       <CardHeader>
-        <CardTitle className="text-tertiary">Preferencias de notificaciones</CardTitle>
-        <CardDescription className="text-tertiary/70">
+        <CardTitle>Preferencias de notificaciones</CardTitle>
+        <CardDescription>
           Configura cómo y cuándo quieres recibir notificaciones
         </CardDescription>
       </CardHeader>
@@ -15,7 +15,7 @@ export function NotificationsTab() {
         <PushNotifications />
       </CardContent>
       <CardFooter>
-        <Button className="bg-primary text-tertiary hover:bg-primary/90">Guardar preferencias</Button>
+        <Button type="button" className="w-full sm:w-auto">Guardar preferencias</Button>
       </CardFooter>
     </Card>
   )
@@ -43,16 +43,16 @@ function EmailNotifications() {
 
   return (
     <div>
-      <h3 className="mb-4 text-lg font-medium text-tertiary">Notificaciones por correo electrónico</h3>
+      <h3 className="mb-4 text-lg font-medium text-foreground">Notificaciones por correo electrónico</h3>
       <div className="space-y-4">
         {emailOptions.map((item, index) => (
           <div key={index} className="flex items-start space-x-3">
-            <Checkbox id={`email-${index}`} className="border-secondary" />
+            <Checkbox id={`email-${index}`} className="border-border" />
             <div className="space-y-1">
-              <Label htmlFor={`email-${index}`} className="text-tertiary">
+              <Label htmlFor={`email-${index}`}>
                 {item.title}
               </Label>
-              <p className="text-sm text-tertiary/70">{item.description}</p>
+              <p className="text-sm text-muted-foreground">{item.description}</p>
             </div>
           </div>
         ))}
@@ -82,16 +82,16 @@ function PushNotifications() {
 
   return (
     <div>
-      <h3 className="mb-4 text-lg font-medium text-tertiary">Notificaciones push</h3>
+      <h3 className="mb-4 text-lg font-medium text-foreground">Notificaciones push</h3>
       <div className="space-y-4">
         {pushOptions.map((item, index) => (
           <div key={index} className="flex items-start space-x-3">
-            <Checkbox id={`push-${index}`} checked={item.checked} className="border-secondary" />
+            <Checkbox id={`push-${index}`} checked={item.checked} className="border-border" />
             <div className="space-y-1">
-              <Label htmlFor={`push-${index}`} className="text-tertiary">
+              <Label htmlFor={`push-${index}`}>
                 {item.title}
               </Label>
-              <p className="text-sm text-tertiary/70">{item.description}</p>
+              <p className="text-sm text-muted-foreground">{item.description}</p>
             </div>
           </div>
         ))}
@@ -99,4 +99,3 @@ function PushNotifications() {
     </div>
   )
 }
-

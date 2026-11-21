@@ -3,6 +3,7 @@
 import * as React from "react"
 
 import { cn } from "@/utils/cn"
+import FallbackImg from "@/assets/fallback/fallback.jpg"
 
 export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: "xs" | "sm" | "md" | "lg" | "xl"
@@ -48,7 +49,7 @@ const AvatarImage = React.forwardRef<HTMLImageElement, AvatarImageProps>(
     return (
       <img
         ref={ref}
-        src={src || "/placeholder.svg"}
+        src={src || FallbackImg}
         alt={alt}
         className={cn("aspect-square h-full w-full", status === "error" ? "hidden" : "", className)}
         onLoad={() => {
@@ -78,9 +79,9 @@ const AvatarFallback = React.forwardRef<HTMLDivElement, AvatarFallbackProps>(
         "flex h-full w-full items-center justify-center rounded-full",
         {
           "bg-secondary-light text-tertiary": variant === "default",
-          "bg-[hsl(220,47%,10%)] text-tertiary": variant === "primary",
+          "bg-primary text-tertiary": variant === "primary",
           "bg-secondary text-tertiary": variant === "secondary",
-          "bg-tertiary text-[hsl(220,47%,10%)]": variant === "tertiary",
+          "bg-tertiary text-primary": variant === "tertiary",
         },
         className,
       )}

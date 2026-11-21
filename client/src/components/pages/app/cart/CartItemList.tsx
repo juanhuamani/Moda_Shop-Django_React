@@ -2,6 +2,7 @@ import { Minus, Plus, Trash2, Check } from "lucide-react"
 import { Button, Image } from "@/components/ui"
 import { Tooltip } from "@/components/ui/ToolTip"
 import { CartItem } from "@/types/CartItem"
+import { formatPrice } from "@/utils/formatPrice"
 
 interface CartItemListProps {
   items: Array<CartItem & { hasChanged: boolean; isUpdating: boolean }>
@@ -12,27 +13,27 @@ interface CartItemListProps {
 
 export function CartItemList({ items, onQuantityChange, onUpdateItem, onRemoveItem }: CartItemListProps) {
   return (
-      <div className="divide-y divide-[hsl(224,34%,30%)]">
+      <div className="divide-y divide-border">
         {items.map((item) => (
           <div key={item.id} className="flex flex-col p-4 sm:flex-row">
             <div className="mb-4 flex sm:mb-0 sm:w-32 sm:flex-none">
               <Image
-                src={item.product.image || "/placeholder.svg"}
+                src={item.product.image || ""}
                 alt={item.product.name}
-                className="h-24 w-24 rounded-md border border-[hsl(224,34%,30%)] object-cover sm:h-32 sm:w-32"
+                className="h-24 w-24 rounded-md border border-border object-cover sm:h-32 sm:w-32"
               />
             </div>
             <div className="flex flex-1 flex-col justify-between sm:pl-4">
               <div>
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-medium text-[hsl(215,100%,92%)]">{item.product.name}</h3>
+                    <h3 className="font-medium text-foreground">{item.product.name}</h3>
                   </div>
                   <div className="text-right">
-                    <div className="font-medium text-[hsl(215,100%,92%)]">€{item.product.price}</div>
+                    <div className="font-medium text-foreground">{formatPrice(item.product.price)}</div>
                     {item.product.originalPrice && (
-                      <div className="text-sm text-[hsl(215,100%,92%)/70] line-through">
-                        €{item.product.originalPrice}
+                      <div className="text-sm text-muted-foreground line-through">
+                        {formatPrice(item.product.originalPrice)}
                       </div>
                     )}
                   </div>
@@ -50,7 +51,7 @@ export function CartItemList({ items, onQuantityChange, onUpdateItem, onRemoveIt
                       <Minus className="h-3 w-3" />
                     </Button>
                   </Tooltip>
-                  <span className="mx-2 w-8 text-center text-[hsl(215,100%,92%)]">{item.quantity}</span>
+                  <span className="mx-2 w-8 text-center text-foreground">{item.quantity}</span>
                   <Tooltip content="Aumentar cantidad">
                     <Button
                       variant="outline"
@@ -62,7 +63,7 @@ export function CartItemList({ items, onQuantityChange, onUpdateItem, onRemoveIt
                   </Tooltip>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="font-medium text-[hsl(215,100%,92%)]">€{(item.product.price * item.quantity).toFixed(2)}</div>
+                  <div className="font-medium text-foreground">{formatPrice(item.product.price * item.quantity)}</div>
                   <Tooltip content="Actualizar producto">
                     <Button
                       variant="ghost"

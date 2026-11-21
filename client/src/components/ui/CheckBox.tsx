@@ -20,7 +20,7 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     }, [indeterminate])
 
     return (
-      <div className="relative flex items-center">
+      <div className="relative flex min-h-11 min-w-11 items-center justify-center">
         <input
           type="checkbox"
           ref={combinedRef}
@@ -33,11 +33,11 @@ const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
         />
         <div
           className={cn(
-            "pointer-events-none absolute left-0 top-0 flex h-4 w-4 items-center justify-center rounded-sm border border-secondary",
+            "pointer-events-none absolute left-1/2 top-1/2 flex h-4 w-4 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-sm border border-secondary",
             "peer-checked:border-transparent",
             {
-              "peer-checked:bg-[hsl(215,100%,92%)] peer-checked:text-[hsl(220,47%,10%)]": variant === "default",
-              "peer-checked:bg-[hsl(220,47%,10%)] peer-checked:text-tertiary": variant === "primary",
+              "peer-checked:bg-tertiary peer-checked:text-primary": variant === "default",
+              "peer-checked:bg-primary peer-checked:text-tertiary": variant === "primary",
               "peer-checked:bg-secondary peer-checked:text-tertiary": variant === "secondary",
             },
             "peer-disabled:opacity-50"

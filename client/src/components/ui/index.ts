@@ -1,7 +1,7 @@
 export { Avatar } from './Avatar';
 export { Badge } from './Badge';
 export { Button } from './Button';
-export { Card } from './Card';
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './Card';
 export { Carousel } from './Carousel';
 export { Checkbox } from './CheckBox';
 export { Input } from './Input';
@@ -12,4 +12,6 @@ export { Spinner } from './Spinner';
 export { StatusBadge } from './StatusBadge';
 export { Switch } from './Switch';
 export { Table } from './Table';
-export { Tabs } from './Tabs';
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './Tabs';
+export { Tooltip, SimpleTooltip, TooltipRoot } from './ToolTip';
+export { UserAvatar } from './UserAvatar';

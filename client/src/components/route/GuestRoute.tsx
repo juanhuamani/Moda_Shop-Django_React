@@ -6,9 +6,8 @@ import LoadingPage from '@/components/common/LoadingPage';
 
 export const GuestRoute = ({ children }: { children: JSX.Element }) => {
   const { isAuthenticated } = useAuth();
-  console.log(isAuthenticated);
   if (isAuthenticated === null) {
-    return <LoadingPage message="Verifying authentication..." />;
+    return <LoadingPage message="Verificando autenticación..." />;
   }
 
   return isAuthenticated ? <Navigate to={paths.app.root.path} replace /> : children;

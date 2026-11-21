@@ -15,13 +15,15 @@ function FilterSection({ title, children, defaultOpen = true }: FilterSectionPro
   const [isOpen, setIsOpen] = useState(defaultOpen)
 
   return (
-    <div className="border-b border-[hsl(224,34%,30%)] py-4 last:border-0">
+    <div className="border-b border-border py-4 last:border-0">
       <button
-        className="flex w-full items-center justify-between text-left font-medium text-[hsl(215,100%,92%)]"
+        type="button"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}
+        className="flex w-full items-center justify-between rounded-control text-left font-medium text-foreground transition-colors hover:text-ring focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       >
         {title}
-        {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        {isOpen ? <ChevronUp className="h-4 w-4" aria-hidden="true" /> : <ChevronDown className="h-4 w-4" aria-hidden="true" />}
       </button>
       {isOpen && <div className="mt-4">{children}</div>}
     </div>
@@ -33,21 +35,12 @@ export function ProductFilters() {
     <Card>
       <CardContent className="p-4">
         <div className="space-y-1">
-          <h3 className="font-medium text-[hsl(215,100%,92%)]">Filtros</h3>
-          <p className="text-sm text-[hsl(215,100%,92%)/70]">Refina tu búsqueda</p>
+          <h3 className="font-medium text-foreground">Filtros</h3>
+          <p className="text-sm text-muted-foreground">Refina tu búsqueda</p>
         </div>
 
         <FilterSection title="Categorías">
-          <div className="space-y-2">
-            {/*{categories.map((category) => (
-              <div key={category.name} className="flex items-center gap-2">
-                <Checkbox id={`category-${category.name}`} />
-                <Label htmlFor={`category-${category.name}`} className="text-sm">
-                  {category.name} <span className="text-[hsl(215,100%,92%)/70]">({category.count})</span>
-                </Label>
-              </div>
-            ))}*/}
-          </div>
+          <div className="space-y-2" />
         </FilterSection>
 
         <FilterSection title="Precio">
@@ -66,7 +59,7 @@ export function ProductFilters() {
                 <Input id="price-max" type="number" placeholder="1000" className="mt-1" />
               </div>
             </div>
-            <Button variant="outline" size="sm" className="w-full">
+            <Button type="button" variant="outline" size="sm" className="w-full">
               Aplicar
             </Button>
           </div>
@@ -88,19 +81,19 @@ export function ProductFilters() {
         <FilterSection title="Colores">
           <div className="flex flex-wrap gap-2">
             {[
-              { name: "Negro", color: "bg-black" },
-              { name: "Blanco", color: "bg-white" },
-              { name: "Rojo", color: "bg-red-500" },
-              { name: "Azul", color: "bg-blue-500" },
-              { name: "Verde", color: "bg-green-500" },
-              { name: "Amarillo", color: "bg-yellow-500" },
+              { name: "Negro", color: "bg-background" },
+              { name: "Blanco", color: "bg-foreground" },
+              { name: "Rojo", color: "bg-danger-light" },
+              { name: "Azul", color: "bg-info-light" },
+              { name: "Verde", color: "bg-success-light" },
+              { name: "Amarillo", color: "bg-warning-light" },
             ].map((color) => (
               <div key={color.name} className="flex items-center gap-2">
                 <div className="flex items-center">
                   <input type="checkbox" id={`color-${color.name}`} className="peer sr-only" />
                   <label
                     htmlFor={`color-${color.name}`}
-                    className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-[hsl(224,34%,30%)] ${color.color} peer-checked:ring-2 peer-checked:ring-[hsl(215,100%,92%)]`}
+                    className={`flex h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-border ${color.color} peer-checked:ring-2 peer-checked:ring-ring peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background`}
                     title={color.name}
                   />
                 </div>
@@ -115,34 +108,38 @@ export function ProductFilters() {
               <div key={rating} className="flex items-center gap-2">
                 <Checkbox id={`rating-${rating}`} />
                 <Label htmlFor={`rating-${rating}`} className="flex items-center text-sm">
-                  {Array.from({ length: rating }).map((_, i) => (
-                    <svg
-                      key={i}
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="text-yellow-500"
-                    >
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                    </svg>
-                  ))}
-                  {Array.from({ length: 5 - rating }).map((_, i) => (
-                    <svg
-                      key={i}
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      className="text-[hsl(215,100%,92%)/30]"
-                    >
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                    </svg>
-                  ))}
+                  <span role="img" aria-label={`${rating} de 5`} className="flex items-center">
+                    {Array.from({ length: rating }).map((_, i) => (
+                      <svg
+                        key={i}
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                        className="text-warning-light"
+                      >
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    ))}
+                    {Array.from({ length: 5 - rating }).map((_, i) => (
+                      <svg
+                        key={i}
+                        aria-hidden="true"
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        className="text-foreground/30"
+                      >
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                      </svg>
+                    ))}
+                  </span>
                   <span className="ml-1">o más</span>
                 </Label>
               </div>
@@ -151,8 +148,8 @@ export function ProductFilters() {
         </FilterSection>
 
         <div className="mt-6 flex flex-col gap-2">
-          <Button className="w-full">Aplicar filtros</Button>
-          <Button variant="outline" className="w-full">
+          <Button type="button" className="w-full">Aplicar filtros</Button>
+          <Button type="button" variant="outline" className="w-full">
             Restablecer
           </Button>
         </div>

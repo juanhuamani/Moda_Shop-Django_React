@@ -1,14 +1,23 @@
-import { paths } from "@/config/paths";
 import { Link } from "react-router-dom";
+import { paths } from "@/config/paths";
+import { buttonVariants } from "@/components/ui/Button";
+import { StatusPage } from "@/components/common/StatusPage";
 
 export const NotFoundRoute = () => {
   return (
-    <div className="flex flex-col items-center font-semibold mt-52">
-      <h1>404 - Not Found</h1>
-      <p>Sorry, the page you are looking for does not exist.</p>
-      <Link to={paths.home.getHref()} replace>
-        Go to Home
-      </Link>
-    </div>
+    <StatusPage
+      code="404"
+      title="Página no encontrada"
+      description="Lo sentimos, la página que buscas no existe o ha sido movida."
+      action={
+        <Link
+          to={paths.home.getHref()}
+          replace
+          className={buttonVariants({ variant: "primary" })}
+        >
+          Volver al inicio
+        </Link>
+      }
+    />
   );
 };

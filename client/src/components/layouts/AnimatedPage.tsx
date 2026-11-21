@@ -1,5 +1,5 @@
-import { motion, Transition, Variants } from "framer-motion";
-import { ReactNode, useEffect, useState } from "react";
+import { motion, useReducedMotion, type Transition, type Variants } from "framer-motion";
+import { ReactNode, useMemo } from "react";
 
 interface AnimatedPageProps {
   children: ReactNode;
@@ -73,110 +73,64 @@ const transitions: Record<TransitionKey, Transition> = {
   slow: { duration: 1, ease: "easeInOut" },
 };
 
-const variantOptions: readonly ("slide" | SimpleVariant)[] = [
-  "fade",
-  "slide",
-  "zoom",
-  "flip",
-  "rotate",
-  "bounce",
-];
-
-const slideDirectionOptions: readonly SlideDirection[] = [
-  "up",
-  "down",
-  "left",
-  "right",
-];
-
-const transitionOptions: readonly TransitionKey[] = [
-  "default",
-  "smooth",
-  "bounce",
-  "elastic",
-  "slow",
-];
-
-const pickRandom = <T,>(options: readonly T[]): T =>
-  options[Math.floor(Math.random() * options.length)];
-
-export const AnimatedPage = ({ 
-  children, 
-  className = "", 
-  variant = "random", 
+export const AnimatedPage = ({
+  children,
+  className = "",
+  variant = "fade",
   direction = "right",
-  duration = 0.5
+  duration = 0.25,
 }: AnimatedPageProps) => {
-  const [currentVariant, setCurrentVariant] = useState<Variants | null>(null);
-  const [currentTransition, setCurrentTransition] = useState<Transition | null>(null);
+  const reduceMotion = useReducedMotion()
 
-  useEffect(() => {
-    if (variant === "random") {
-      const randomVariant = pickRandom(variantOptions);
-      
-      if (randomVariant === "slide") {
-        setCurrentVariant(slideVariants[pickRandom(slideDirectionOptions)]);
-      } else {
-        setCurrentVariant(variants[randomVariant]);
-      }
-      
-      const randomTransition = pickRandom(transitionOptions);
-      setCurrentTransition({...transitions[randomTransition], duration});
-    } else if (variant === "slide") {
-      setCurrentVariant(slideVariants[direction]);
-      setCurrentTransition({...transitions.smooth, duration});
-    } else {
-      setCurrentVariant(variants[variant]);
-      
-      if (variant === "bounce") {
-        setCurrentTransition(transitions.bounce);
-      } else if (variant === "flip" || variant === "rotate") {
-        setCurrentTransition(transitions.smooth);
-      } else {
-        setCurrentTransition({...transitions.default, duration});
+  const pageMotion = useMemo<{ variants: Variants; transition: Transition }>(() => {
+    if (reduceMotion) {
+      return {
+        variants: {
+          initial: { opacity: 1 },
+          in: { opacity: 1 },
+          exit: { opacity: 1 },
+        },
+        transition: { duration: 0 },
       }
     }
-  }, [variant, direction, duration]);
 
-  if (!currentVariant || !currentTransition) {
-    return null;
-  }
+    if (variant === "random") {
+      return { variants: variants.fade, transition: { ...transitions.default, duration } }
+    }
+
+    if (variant === "slide") {
+      return {
+        variants: slideVariants[direction],
+        transition: { ...transitions.smooth, duration },
+      }
+    }
+
+    const transition: Transition =
+      variant === "bounce"
+        ? transitions.bounce
+        : variant === "flip" || variant === "rotate"
+          ? transitions.smooth
+          : { ...transitions.default, duration }
+
+    return { variants: variants[variant], transition }
+  }, [variant, direction, duration, reduceMotion])
 
   return (
     <motion.div
       className={`animated-page ${className}`}
-      initial="initial"
+      initial={reduceMotion ? false : "initial"}
       animate="in"
       exit="exit"
-      variants={currentVariant}
-      transition={currentTransition}
-      style={{ 
-        position: "relative", 
-        width: "100%", 
+      variants={pageMotion.variants}
+      transition={pageMotion.transition}
+      style={{
+        position: "relative",
+        width: "100%",
         height: "100%",
         perspective: variant === "flip" ? "1200px" : undefined,
         transformStyle: variant === "flip" ? "preserve-3d" : undefined,
       }}
     >
-      {(variant === "zoom" || variant === "rotate") && (
-        <motion.div
-          className="backdrop-blur"
-          initial={{ backdropFilter: "blur(8px)" }}
-          animate={{ backdropFilter: "blur(0px)" }}
-          exit={{ backdropFilter: "blur(8px)" }}
-          transition={{ duration: duration * 0.8 }}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            zIndex: -1,
-            pointerEvents: "none",
-          }}
-        />
-      )}
-      
       {children}
     </motion.div>
   );

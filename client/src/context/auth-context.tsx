@@ -20,7 +20,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   const refreshAuth = useCallback(async () => {
-    setIsAuthenticated(null);
     const valid = await bootstrapAuth();
     setIsAuthenticated(valid);
   }, []);

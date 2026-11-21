@@ -65,7 +65,7 @@ export function Tooltip({
           place={position}
           delayShow={delay}
           className={cn(
-            "!bg-[hsl(224,34%,22%)] !text-[hsl(215,100%,92%)] !rounded-md !shadow-md !px-3 !py-1.5 !text-xs !font-medium !z-50",
+            "!bg-tooltip !text-foreground !rounded-control !shadow-elevated !px-3 !py-1.5 !text-xs !font-medium !z-50",
             className
           )}
           noArrow={!arrow}
@@ -77,7 +77,7 @@ export function Tooltip({
           place={position}
           delayShow={delay}
           className={cn(
-            "!bg-[hsl(224,34%,22%)] !text-[hsl(215,100%,92%)] !rounded-md !shadow-md !px-3 !py-1.5 !text-xs !font-medium !z-50",
+            "!bg-tooltip !text-foreground !rounded-control !shadow-elevated !px-3 !py-1.5 !text-xs !font-medium !z-50",
             className
           )}
           noArrow={!arrow}

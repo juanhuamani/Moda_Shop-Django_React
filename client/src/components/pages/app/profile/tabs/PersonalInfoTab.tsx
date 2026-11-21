@@ -49,14 +49,6 @@ export function PersonalInfoTab() {
   );
 }
 
-/**
- * Diferencias entre el formulario y el usuario actual, limitadas a los campos
- * editables del formulario.
- *
- * Se comparan campo por campo a propósito: indexar `Partial<UserType>` con una
- * clave `string` no es tipable sin `any`, y la lista explícita además impide
- * enviar `id`, `avatar` o cualquier valor sin cambios.
- */
 const getChangedProfileFields = (
   data: UserType,
   current: UserType
@@ -86,6 +78,7 @@ function ProfileInfoCard({
   handleSaveProfile: () => void;
   uploadUser: (user: UserType) => void;
 }) {
+  const [isSaving, setIsSaving] = useState(false);
   const { register, handleSubmit, reset, setError, formState: { errors } } = useForm<UserType>({
     defaultValues: user,
   });
@@ -98,30 +91,34 @@ function ProfileInfoCard({
     const updatedData = getChangedProfileFields(data, user);
 
     if (Object.keys(updatedData).length > 0) {
+      setIsSaving(true);
       api
         .put(`/auth/profile/update`, updatedData)
-      .then((response) => {
-        uploadUser(response.data.user);
-        toast.success('Informacion actualizada',{
-          position: "bottom-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-        });
-        handleSaveProfile();
-      }) 
-      .catch((error) => {
-        if (error.response?.data) {
-          const { data } = error.response;
-          for (const key in data) {
-            const errorMessage = data[key][0];
-            setError(key as keyof UserType, {
-              type: "manual",
-              message: errorMessage,
-            });
+        .then((response) => {
+          uploadUser(response.data.user);
+          toast.success('Informacion actualizada',{
+            position: "bottom-right",
+            autoClose: 5000,
+            hideProgressBar: false,
+            closeOnClick: true,
+          });
+          handleSaveProfile();
+        })
+        .catch((error) => {
+          if (error.response?.data) {
+            const { data } = error.response;
+            for (const key in data) {
+              const errorMessage = data[key][0];
+              setError(key as keyof UserType, {
+                type: "manual",
+                message: errorMessage,
+              });
+            }
           }
-        }
-      })
+        })
+        .finally(() => {
+          setIsSaving(false);
+        });
     } else {
       toast.info('No se han realizado cambios',{
         position: "bottom-right",
@@ -139,40 +136,39 @@ function ProfileInfoCard({
   };
 
   return (
-    <Card className="bg-secondary-light border-secondary">
+    <Card className="bg-surface border-card-border">
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle className="text-tertiary">
-            Información del perfil
-          </CardTitle>
-          <CardDescription className="text-tertiary/70">
+          <CardTitle>Información del perfil</CardTitle>
+          <CardDescription>
             Actualiza tu información personal
           </CardDescription>
         </div>
         {!isEditing ? (
           <Button
+            type="button"
             variant="outline"
             onClick={() => setIsEditing(true)}
-            className="border-secondary text-tertiary hover:bg-secondary hover:text-tertiary"
           >
-            <Edit className="mr-2 h-4 w-4" />
+            <Edit className="mr-2 h-4 w-4" aria-hidden="true" />
             Editar
           </Button>
         ) : (
           <div className="flex gap-2">
             <Button
+              type="button"
               variant="outline"
               onClick={handleReset}
-              className="border-secondary text-tertiary hover:bg-secondary hover:text-tertiary"
             >
-              <X className="mr-2 h-4 w-4" />
+              <X className="mr-2 h-4 w-4" aria-hidden="true" />
               Cancelar
             </Button>
             <Button
+              type="button"
               onClick={handleSubmit(onSubmit)}
-              className="bg-primary text-tertiary hover:bg-primary/90"
+              isLoading={isSaving}
             >
-              <Save className="mr-2 h-4 w-4" />
+              <Save className="mr-2 h-4 w-4" aria-hidden="true" />
               Guardar
             </Button>
           </div>
@@ -181,85 +177,72 @@ function ProfileInfoCard({
       <CardContent className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-tertiary">
-              Nombre completo
-            </Label>
-            <div className="flex flex-row gap-2">
-              <Input
-                {...register("first_name")}
-                errorMessage={errors?.first_name?.message}
-                id="first_name"
-                disabled={!isEditing}
-                className="bg-secondary border-secondary text-tertiary"
-                icon={<User className="h-4 w-4 text-tertiary/70" />}
-              />
-              <Input
-                {...register("last_name")}
-                errorMessage={errors?.last_name?.message}
-                id="last_name"
-                disabled={!isEditing}
-                className="bg-secondary border-secondary text-tertiary"
-                icon={<User className="h-4 w-4 text-tertiary/70" />}
-              />
+            <div className="grid gap-2 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="first_name">Nombre</Label>
+                <Input
+                  {...register("first_name")}
+                  errorMessage={errors?.first_name?.message}
+                  id="first_name"
+                  disabled={!isEditing}
+                  icon={<User className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="last_name">Apellido</Label>
+                <Input
+                  {...register("last_name")}
+                  errorMessage={errors?.last_name?.message}
+                  id="last_name"
+                  disabled={!isEditing}
+                  icon={<User className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
+                />
+              </div>
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-tertiary">
-              Correo electrónico
-            </Label>
+            <Label htmlFor="email">Correo electrónico</Label>
             <Input
               {...register("email")}
               errorMessage={errors?.email?.message}
               id="email"
               type="email"
               disabled={!isEditing}
-              className="bg-secondary border-secondary text-tertiary"
-              icon={<Mail className="h-4 w-4 text-tertiary/70" />}
+              icon={<Mail className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="phone" className="text-tertiary">
-              Teléfono
-            </Label>
+            <Label htmlFor="phone">Teléfono</Label>
             <Input
               {...register("phone")}
               errorMessage={errors?.phone?.message}
               id="phone"
               disabled={!isEditing}
-              className="bg-secondary border-secondary text-tertiary"
-              icon={<Phone className="h-4 w-4 text-tertiary/70" />}
+              icon={<Phone className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="location" className="text-tertiary">
-              Ubicación
-            </Label>
+            <Label htmlFor="location">Ubicación</Label>
             <Input
               {...register("location")}
               errorMessage={errors?.location?.message}
               id="location"
               disabled={!isEditing}
-              className="bg-secondary border-secondary text-tertiary"
-              icon={<MapPin className="h-4 w-4 text-tertiary/70" />}
+              icon={<MapPin className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="birthdate" className="text-tertiary">
-              Fecha de nacimiento
-            </Label>
+            <Label htmlFor="birthdate">Fecha de nacimiento</Label>
             <Input
               {...register("birthdate")}
               errorMessage={errors?.birthdate?.message}
-              id="location"
+              id="birthdate"
               disabled={!isEditing}
-              className="bg-secondary border-secondary text-tertiary"
-              icon={<Calendar className="h-4 w-4 text-tertiary/70" />}
+              icon={<Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="role" className="text-tertiary">
-              Rol
-            </Label>
+          <div className="space-y-2" role="group" aria-label="Rol">
+            <Label>Rol</Label>
             <Select
               options={[
                 { value: "developer", label: "Desarrollador" },
@@ -267,24 +250,17 @@ function ProfileInfoCard({
                 { value: "manager", label: "Gerente" },
                 { value: "admin", label: "Administrador" },
               ]}
-              //value={user.role === "Desarrollador Senior" ? "developer" : ""}
               disabled={!isEditing}
-              className="bg-secondary border-secondary text-tertiary"
             />
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="bio" className="text-tertiary">
-            Biografía
-          </Label>
+          <Label htmlFor="bio">Biografía</Label>
           <textarea
             id="bio"
             name="bio"
             rows={4}
-            className={`w-full rounded-md border border-secondary bg-secondary px-3 py-2 text-tertiary placeholder:text-tertiary/50 focus:outline-none focus:ring-2 focus:ring-tertiary/50 ${
-              !isEditing ? "opacity-70" : ""
-            }`}
-            //value={user.bio}
+            className="w-full rounded-control border border-input bg-subtle px-3 py-2 text-sm text-foreground ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
             disabled={!isEditing}
           />
         </div>
@@ -295,27 +271,27 @@ function ProfileInfoCard({
 
 function PreferencesCard() {
   return (
-    <Card className="bg-secondary-light border-secondary">
+    <Card className="bg-surface border-card-border">
       <CardHeader>
-        <CardTitle className="text-tertiary">Preferencias</CardTitle>
-        <CardDescription className="text-tertiary/70">
+        <CardTitle>Preferencias</CardTitle>
+        <CardDescription>
           Configura tus preferencias de la plataforma
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label className="text-tertiary">Mostrar actividad en línea</Label>
-            <p className="text-sm text-tertiary/70">
+            <Label>Mostrar actividad en línea</Label>
+            <p className="text-sm text-muted-foreground">
               Permite que otros usuarios vean cuando estás en línea
             </p>
           </div>
-          <Switch id="online-status" />
+          <Switch aria-label="Mostrar actividad en línea" />
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between" role="group" aria-label="Idioma">
           <div className="space-y-0.5">
-            <Label className="text-tertiary">Idioma</Label>
-            <p className="text-sm text-tertiary/70">
+            <Label>Idioma</Label>
+            <p className="text-sm text-muted-foreground">
               Selecciona el idioma de la plataforma
             </p>
           </div>
@@ -328,7 +304,7 @@ function PreferencesCard() {
             ]}
             value="es"
             onChange={() => {}}
-            className="w-40 bg-secondary border-secondary text-tertiary"
+            className="w-40"
           />
         </div>
       </CardContent>

@@ -17,7 +17,7 @@ export function SecurityTab() {
 }
 
 function PasswordCard() {
-  const [isloading, setIsloading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { register, watch, formState: { errors }, handleSubmit, setError, reset } = useForm({
     defaultValues: {
       password: "",
@@ -27,7 +27,7 @@ function PasswordCard() {
   });
 
   const onSubmit = (data: { password: string; newPassword: string; confirmPassword: string }) => {
-    setIsloading(true);
+    setIsLoading(true);
     api.put("/auth/password/change", data)
       .then(() => {
         showSuccessToast("Contraseña actualizada");
@@ -48,48 +48,46 @@ function PasswordCard() {
           showErrorToast('Error al actualizar la contrasena', { autoClose: 7000 });
         }
       }).finally(() => {
-        setIsloading(false);
+        setIsLoading(false);
       });
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <Card className="bg-secondary-light border-secondary" onSubmit={handleSubmit(onSubmit)}>
+      <Card className="bg-surface border-card-border">
         <CardHeader>
-          <CardTitle className="text-tertiary">Cambiar contraseña</CardTitle>
-          <CardDescription className="text-tertiary/70">
+          <CardTitle>Cambiar contraseña</CardTitle>
+          <CardDescription>
             Actualiza tu contraseña para mantener tu cuenta segura
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="current-password" className="text-tertiary">
+            <Label htmlFor="current-password">
               Contraseña actual
             </Label>
             <Input
               id="current-password"
               type="password"
-              className="bg-secondary border-secondary text-tertiary"
-              icon={<Lock className="h-4 w-4 text-tertiary/70" />}
+              icon={<Lock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
               errorMessage={errors.password?.message}
-                {...register("password", {
-                  required: "Este campo es obligatorio",
-                  minLength: {
-                    value: 6,
-                    message: "La contraseña debe tener al menos 6 caracteres",
-                  },
-                })}
+              {...register("password", {
+                required: "Este campo es obligatorio",
+                minLength: {
+                  value: 6,
+                  message: "La contraseña debe tener al menos 6 caracteres",
+                },
+              })}
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="new-password" className="text-tertiary">
+            <Label htmlFor="new-password">
               Nueva contraseña
             </Label>
             <Input
               id="new-password"
               type="password"
-              className="bg-secondary border-secondary text-tertiary"
-              icon={<Lock className="h-4 w-4 text-tertiary/70" />}
+              icon={<Lock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
               errorMessage={errors.newPassword?.message}
               {...register("newPassword", {
                 required: "Este campo es obligatorio",
@@ -101,14 +99,13 @@ function PasswordCard() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirm-password" className="text-tertiary">
+            <Label htmlFor="confirm-password">
               Confirmar nueva contraseña
             </Label>
             <Input
               id="confirm-password"
               type="password"
-              className="bg-secondary border-secondary text-tertiary"
-              icon={<Lock className="h-4 w-4 text-tertiary/70" />}
+              icon={<Lock className="h-4 w-4 text-muted-foreground" aria-hidden="true" />}
               {...register("confirmPassword", {
                 required: "Este campo es obligatorio",
                 validate: (value) => {
@@ -122,7 +119,7 @@ function PasswordCard() {
           </div>
         </CardContent>
         <CardFooter>
-          <Button type="submit" className="bg-primary text-tertiary hover:bg-secondary" isLoading={isloading}>Actualizar contraseña</Button>
+          <Button type="submit" isLoading={isLoading}>Actualizar contraseña</Button>
         </CardFooter>
       </Card>
     </form>
@@ -131,23 +128,23 @@ function PasswordCard() {
 
 function TwoFactorCard() {
   return (
-    <Card className="bg-secondary-light border-secondary">
+    <Card className="bg-surface border-card-border">
       <CardHeader>
-        <CardTitle className="text-tertiary">Autenticación de dos factores</CardTitle>
-        <CardDescription className="text-tertiary/70">
+        <CardTitle>Autenticación de dos factores</CardTitle>
+        <CardDescription>
           Añade una capa adicional de seguridad a tu cuenta
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label className="text-tertiary">Autenticación de dos factores</Label>
-            <p className="text-sm text-tertiary/70">Protege tu cuenta con autenticación de dos factores</p>
+            <Label>Autenticación de dos factores</Label>
+            <p className="text-sm text-muted-foreground">Protege tu cuenta con autenticación de dos factores</p>
           </div>
-          <Switch id="2fa" />
+          <Switch aria-label="Autenticación de dos factores" />
         </div>
-        <div className="rounded-md bg-primary p-4">
-          <p className="text-sm text-tertiary">
+        <div className="rounded-control bg-surface-raised p-4">
+          <p className="text-sm text-foreground">
             La autenticación de dos factores no está configurada. Activa el interruptor para comenzar la configuración.
           </p>
         </div>
@@ -179,22 +176,22 @@ function ActiveSessionsCard() {
   ]
 
   return (
-    <Card className="bg-secondary-light border-secondary">
+    <Card className="bg-surface border-card-border">
       <CardHeader>
-        <CardTitle className="text-tertiary">Sesiones activas</CardTitle>
-        <CardDescription className="text-tertiary/70">
+        <CardTitle>Sesiones activas</CardTitle>
+        <CardDescription>
           Gestiona tus sesiones activas en diferentes dispositivos
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {sessions.map((session, index) => (
-          <div key={index} className="flex items-center justify-between rounded-md border border-secondary p-4">
+          <div key={index} className="flex items-center justify-between rounded-control border border-border p-4">
             <div className="space-y-1">
               <div className="flex items-center">
-                <p className="font-medium text-tertiary">{session.device}</p>
-                {session.current && <Badge className="ml-2 bg-primary text-tertiary">Actual</Badge>}
+                <p className="font-medium text-foreground">{session.device}</p>
+                {session.current && <Badge variant="primary" className="ml-2">Actual</Badge>}
               </div>
-              <p className="text-sm text-tertiary/70">
+              <p className="text-sm text-muted-foreground">
                 {session.location} • {session.lastActive}
               </p>
             </div>
@@ -202,7 +199,7 @@ function ActiveSessionsCard() {
               <Button
                 variant="outline"
                 size="sm"
-                className="border-secondary text-tertiary hover:bg-secondary hover:text-tertiary"
+                className="hover:bg-surface-raised"
               >
                 Cerrar sesión
               </Button>
@@ -213,4 +210,3 @@ function ActiveSessionsCard() {
     </Card>
   )
 }
-

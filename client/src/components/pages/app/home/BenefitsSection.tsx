@@ -39,17 +39,17 @@ export function BenefitsSection() {
         <CardDescription>Beneficios de comprar en ModaShop</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {benefits.map((benefit, index) => (
+        {benefits.map((benefit) => (
           <div
-            key={index}
-            className="flex items-start gap-4 rounded-lg border border-[hsl(224,34%,30%)] p-4 transition-colors hover:bg-[hsl(224,34%,25%)]"
+            key={benefit.title}
+            className="flex items-start gap-4 rounded-card border border-border p-4 transition-colors hover:bg-surface-raised"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[hsl(215,100%,92%)] text-[hsl(220,47%,10%)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-tertiary text-primary">
               {benefit.icon}
             </div>
             <div>
-              <h3 className="font-medium text-[hsl(215,100%,92%)]">{benefit.title}</h3>
-              <p className="text-sm text-[hsl(215,100%,92%)/70]">{benefit.description}</p>
+              <h3 className="font-medium text-foreground">{benefit.title}</h3>
+              <p className="text-sm text-muted-foreground">{benefit.description}</p>
             </div>
           </div>
         ))}

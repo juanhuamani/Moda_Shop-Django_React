@@ -8,19 +8,19 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "border-transparent bg-secondary-light text-tertiary",
-        primary: "border-transparent bg-tertiary text-[hsl(220,47%,10%)]",
-        secondary: "border-transparent bg-secondary text-tertiary",
-        destructive: "border-transparent bg-[#F43F5E] text-white",
-        outline: "text-tertiary border-secondary",
-        success: "border-transparent bg-[#2DD4BF] text-[hsl(220,47%,10%)]",
-        warning: "border-transparent bg-[#F59E0B] text-white",
-        info: "border-transparent bg-[#3B82F6] text-white",
+        default: "border-transparent bg-secondary-light text-foreground",
+        primary: "border-transparent bg-tertiary text-primary",
+        secondary: "border-transparent bg-secondary text-foreground",
+        destructive: "border-transparent bg-danger text-danger-foreground",
+        outline: "border-border bg-transparent text-foreground",
+        success: "border-transparent bg-success text-success-foreground",
+        warning: "border-transparent bg-warning text-warning-foreground",
+        info: "border-transparent bg-info text-info-foreground",
         status: {
-          active: "border-transparent bg-[#2DD4BF] text-[hsl(220,47%,10%)]",
-          completed: "border-transparent bg-[#2DD4BF] text-[hsl(220,47%,10%)]",
-          canceled: "border-transparent bg-[#F43F5E] text-white",
-          pending: "border-transparent bg-[#F59E0B] text-white",
+          active: "border-transparent bg-success text-success-foreground",
+          completed: "border-transparent bg-success text-success-foreground",
+          canceled: "border-transparent bg-danger text-danger-foreground",
+          pending: "border-transparent bg-warning text-warning-foreground",
         },
       },
       size: {

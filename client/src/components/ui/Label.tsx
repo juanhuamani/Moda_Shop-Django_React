@@ -9,8 +9,8 @@ const labelVariants = cva(
     variants: {
       variant: {
         default: "text-tertiary",
-        muted: "text-[hsl(215,100%,92%)/70]",
-        dark: "text-[hsl(220,47%,10%)]",
+        muted: "text-muted-foreground",
+        dark: "text-primary",
       },
       size: {
         default: "text-sm",

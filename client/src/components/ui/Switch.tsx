@@ -22,8 +22,8 @@ const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(({ className, var
           "peer-disabled:cursor-not-allowed peer-disabled:opacity-50",
           {
             "bg-secondary peer-checked:bg-tertiary": variant === "default",
-            "bg-secondary peer-checked:bg-[hsl(220,47%,10%)]": variant === "primary",
-            "bg-secondary peer-checked:bg-[#2DD4BF]": variant === "success",
+            "bg-secondary peer-checked:bg-primary": variant === "primary",
+            "bg-secondary peer-checked:bg-success": variant === "success",
           },
           className,
         )}

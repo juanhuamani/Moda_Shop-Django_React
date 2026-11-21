@@ -8,17 +8,21 @@ interface RatingProps {
 
 export function Rating({ value, className }: RatingProps) {
   const rating = Math.max(0, Math.min(5, value))
-  console.log(rating)
   return (
-    <div className={cn("flex items-center", className)}>
+    <div
+      className={cn("flex items-center", className)}
+      role="img"
+      aria-label={`${value} de 5`}
+    >
       {Array.from({ length: 5 }).map((_, index) => (
         <Star
           key={index}
+          aria-hidden="true"
           className={cn(
             "h-4 w-4",
             index < rating
-              ? "fill-current text-yellow-400"
-              : "text-[hsl(215,100%,92%)/30]" 
+              ? "fill-current text-warning-light"
+              : "text-foreground/30"
           )}
         />
       ))}

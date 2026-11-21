@@ -6,6 +6,7 @@ import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { showInfoToast } from "@/utils/toast";
 
 interface RegisterFormProps {
   onSuccess: () => void;
@@ -38,7 +39,6 @@ const isKnownErrorField = (key: string): key is KnownErrorField =>
 const GENERIC_REGISTER_ERROR =
   "No se pudo completar el registro. Revisa los datos e inténtalo de nuevo.";
 
-/** DRF responde `{campo: ["mensaje"]}`; nunca `{errors: {campo: {message}}}`. */
 const formatErrorMessage = (value: unknown): string => {
   if (Array.isArray(value)) {
     return value.map((message) => String(message)).join(" ");
@@ -52,6 +52,7 @@ const formatErrorMessage = (value: unknown): string => {
 const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showPassword2, setShowPassword2] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const {
     register,
     handleSubmit,
@@ -118,25 +119,28 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       });
       return;
     }
+    setIsLoading(true);
     api
       .post("/auth/register", data)
-      .then((response) => {
-        console.log(response.data);
+      .then(() => {
         onSuccess();
       })
       .catch((error) => {
         console.error(error);
         applyServerErrors(error);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   };
 
   return (
     <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
       <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold tracking-tight text-tertiary">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           {t('register.title')}
         </h1>
-        <p className="text-sm text-tertiary">
+        <p className="text-sm text-muted-foreground">
           {t('register.description')}
         </p>
       </div>
@@ -144,13 +148,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       <div className="space-y-4">
         <div className="grid lg:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="first-name" className="text-tertiary">
+            <Label htmlFor="first-name">
               {t('register.firstName')}
             </Label>
             <Input
               id="first-name"
               placeholder="Juan"
-              className="bg-secondary-light border-secondary text-tertiary"
               errorMessage={errors.first_name?.message}
               {...register("first_name", {
                 required: "Este campo es obligatorio",
@@ -162,13 +165,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="last-name" className="text-tertiary">
+            <Label htmlFor="last-name">
               {t('register.lastName')}
             </Label>
             <Input
               id="last-name"
               placeholder="Pérez"
-              className="bg-secondary-light border-secondary text-tertiary"
               errorMessage={errors.last_name?.message}
               {...register("last_name", {
                 required: "Este campo es obligatorio",
@@ -181,14 +183,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="username" className="text-tertiary">
+          <Label htmlFor="username">
             {t('register.username')}
           </Label>
           <Input
             id="username"
             placeholder="JuanPerez123"
             autoComplete="username"
-            className="bg-secondary-light border-secondary text-tertiary"
             errorMessage={errors.username?.message}
             {...register("username", {
               required: "Este campo es obligatorio",
@@ -196,7 +197,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-tertiary">
+          <Label htmlFor="email">
             {t('register.email')}
           </Label>
           <Input
@@ -206,7 +207,6 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
             autoCapitalize="none"
             autoComplete="email"
             autoCorrect="off"
-            className="bg-secondary-light border-secondary text-tertiary"
             errorMessage={errors.email?.message}
             {...register("email", {
               required: "Este campo es obligatorio",
@@ -218,7 +218,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-tertiary">
+          <Label htmlFor="password">
             {t('register.password')}
           </Label>
           <div className="relative">
@@ -226,22 +226,18 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
               id="password"
               type={showPassword ? "text" : "password"}
               autoComplete="new-password"
-              className="bg-secondary-light border-secondary text-tertiary pr-10"
+              className="pr-12"
               iconPosition="right"
               icon={
-                showPassword ? (
-                  <EyeOff
-                    size={16}
-                    className="text-tertiary"
-                    onClick={() => setShowPassword(!showPassword)}
-                  />
-                ) : (
-                  <Eye
-                    size={16}
-                    className="text-tertiary"
-                    onClick={() => setShowPassword(!showPassword)}
-                  />
-                )
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  aria-pressed={showPassword}
+                  onClick={() => setShowPassword((value) => !value)}
+                  className="flex h-8 w-8 items-center justify-center rounded-control text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               }
               errorMessage={errors.password?.message}
               {...register("password", {
@@ -255,7 +251,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           </div>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-tertiary">
+          <Label htmlFor="password2">
             {t('register.confirmPassword')}
           </Label>
           <div className="relative">
@@ -263,22 +259,18 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
               id="password2"
               type={showPassword2 ? "text" : "password"}
               autoComplete="new-password"
-              className="bg-secondary-light border-secondary text-tertiary pr-10"
+              className="pr-12"
               iconPosition="right"
               icon={
-                showPassword2 ? (
-                  <EyeOff
-                    size={16}
-                    className="text-tertiary"
-                    onClick={() => setShowPassword2(!showPassword2)}
-                  />
-                ) : (
-                  <Eye
-                    size={16}
-                    className="text-tertiary"
-                    onClick={() => setShowPassword2(!showPassword2)}
-                  />
-                )
+                <button
+                  type="button"
+                  aria-label={showPassword2 ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"}
+                  aria-pressed={showPassword2}
+                  onClick={() => setShowPassword2((value) => !value)}
+                  className="flex h-8 w-8 items-center justify-center rounded-control text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                >
+                  {showPassword2 ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
               }
               errorMessage={errors.password2?.message}
               {...register("password2", {
@@ -298,37 +290,34 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
               clearErrors("terms");
             }}
           />
-          <Label htmlFor="terms" className="text-xs text-tertiary">
+          <Label htmlFor="terms">
             {t('register.terms')}
           </Label>
         </div>
         {errors.terms && (
-          <p className="text-sm text-red-600">{errors.terms.message}</p>
+          <p role="alert" className="text-sm text-danger-light">{errors.terms.message}</p>
         )}
         {errors.root?.message && (
-          <p className="text-sm text-red-600">{errors.root.message}</p>
+          <p role="alert" className="text-sm text-danger-light">{errors.root.message}</p>
         )}
-        <Button className="w-full bg-tertiary text-[hsl(220,47%,10%)] hover:bg-[hsl(215,100%,85%)]">
+        <Button type="submit" className="w-full" isLoading={isLoading} loadingText="Creando cuenta...">
           {t('register.signUp')}
         </Button>
       </div>
 
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-secondary" />
+          <span className="w-full border-t border-border" />
         </div>
         <div className="relative flex justify-center text-xs">
-          <span className="bg-[hsl(220,47%,10%)] px-2 text-tertiary">
+          <span className="bg-background px-2 text-muted-foreground">
             O continuar con
           </span>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <Button
-          variant="outline"
-          className="border-secondary bg-secondary-light text-tertiary hover:bg-[hsl(224,34%,25%)]"
-        >
+        <Button variant="outline" onClick={() => showInfoToast("El acceso social estará disponible pronto")}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -355,10 +344,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
           </svg>
           Google
         </Button>
-        <Button
-          variant="outline"
-          className="border-secondary bg-secondary-light text-tertiary hover:bg-[hsl(224,34%,25%)]"
-        >
+        <Button variant="outline" onClick={() => showInfoToast("El acceso social estará disponible pronto")}>
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -371,8 +357,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess }) => {
       </div>
 
       <div className="text-center text-sm">
-        <span className="text-tertiary"> {t('register.haveAccount')} </span>{" "}
-        <Link className="font-medium text-tertiary hover:underline" to="/login">
+        <span className="text-muted-foreground"> {t('register.haveAccount')} </span>{" "}
+        <Link className="font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" to="/login">
           {t('register.login')}
         </Link>
       </div>
